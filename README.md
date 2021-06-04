@@ -1,0 +1,1 @@
+# vscode-ascii-diagram-extension
