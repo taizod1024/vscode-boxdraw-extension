@@ -18,15 +18,130 @@
   "contributes": {
     "commands": [
       {
-        "command": "boxdraw-extension.changeBoxdrawMode",
-        "title": "Boxdraw: Change Boxdraw Mode"
+        "command": "boxdraw-extension.toggleMode",
+        "title": "Boxdraw: Toggle Mode"
+      },
+      {
+        "command": "boxdraw-extension.toggleBold",
+        "title": "Boxdraw: Toggle Bold"
+      },
+      {
+        "command": "boxdraw-extension.drawLeft",
+        "title": "Boxdraw: Draw Left"
+      },
+      {
+        "command": "boxdraw-extension.drawRight",
+        "title": "Boxdraw: Draw Right"
+      },
+      {
+        "command": "boxdraw-extension.drawUp",
+        "title": "Boxdraw: Draw Up"
+      },
+      {
+        "command": "boxdraw-extension.drawDown",
+        "title": "Boxdraw: Draw Down"
+      },
+      {
+        "command": "boxdraw-extension.drawLeftArrow",
+        "title": "Boxdraw: Draw Left Arrow"
+      },
+      {
+        "command": "boxdraw-extension.drawRightArrow",
+        "title": "Boxdraw: Draw Right Arrow"
+      },
+      {
+        "command": "boxdraw-extension.drawUpArrow",
+        "title": "Boxdraw: Draw Up Arrow"
+      },
+      {
+        "command": "boxdraw-extension.drawDownArrow",
+        "title": "Boxdraw: Draw Down Arrow"
+      },
+      {
+        "command": "boxdraw-extension.clearLeft",
+        "title": "Boxdraw: Clear Left"
+      },
+      {
+        "command": "boxdraw-extension.clearRight",
+        "title": "Boxdraw: Clear Right"
+      },
+      {
+        "command": "boxdraw-extension.clearUp",
+        "title": "Boxdraw: Clear Up"
+      },
+      {
+        "command": "boxdraw-extension.clearDown",
+        "title": "Boxdraw: Clear Down"
       }
     ],
     "keybindings": [
       {
-        "command": "boxdraw-extension.changeBoxdrawMode",
+        "command": "boxdraw-extension.toggleMode",
+        "key": "ctrl+alt+m"
+      },
+      {
+        "command": "boxdraw-extension.toggleBold",
+        "key": "ctrl+alt+b"
+      },
+      {
+        "command": "boxdraw-extension.drawLeft",
+        "key": "ctrl+left",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.drawRight",
         "key": "ctrl+right",
-        "when": "boxdraw != 'off'"
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.drawUp",
+        "key": "ctrl+up",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.drawDown",
+        "key": "ctrl+down",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.drawLeftArrow",
+        "key": "ctrl+alt+left",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.drawRightArrow",
+        "key": "ctrl+alt+right",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.drawUpArrow",
+        "key": "ctrl+alt+up",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.drawDownArrow",
+        "key": "ctrl+alt+down",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.clearLeft",
+        "key": "ctrl+shift+left",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.clearRight",
+        "key": "ctrl+shift+right",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.clearUp",
+        "key": "ctrl+shift+up",
+        "when": "boxdrawMode" 
+      },
+      {
+        "command": "boxdraw-extension.clearDown",
+        "key": "ctrl+shift+down",
+        "when": "boxdrawMode" 
       }
     ]
   },

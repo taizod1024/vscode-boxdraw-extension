@@ -12,7 +12,8 @@ class BoxdrawExtension {
     public applabel: string;
 
     // context
-    public boxdrawmode: "off" | "normal" | "thick";
+    public mode: boolean;
+    public bold: boolean;
 
     // vscode
     public channel: vscode.OutputChannel;
@@ -35,37 +36,89 @@ class BoxdrawExtension {
         this.channel.appendLine(`[${this.timestamp()}] ${this.appname}`);
 
         // init context
-        this.boxdrawmode = "off";
+        this.mode = false;
+        this.bold = false;
 
         // init vscode
-        let commandid;
         // command
-        commandid = `${this.appid}.changeBoxdrawMode`;
-        context.subscriptions.push(vscode.commands.registerCommand(commandid, () => {
-            boxdrawextension.changeBoxdrawMode().catch((ex) => {
-                boxdrawextension.channel.appendLine("**** " + ex + " ****");
-            });
-        }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleMode`, () => { boxdrawextension.toggleMode(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleBold`, () => { boxdrawextension.toggleBold(); }));
         // statusbar
         this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-        this.statusbaritem.command = commandid;
-        this.statusbaritem.text = `${this.applabel}: ${this.boxdrawmode}`;
+        this.statusbaritem.command = `${this.appid}.toggleMode`;
         this.statusbaritem.show();
         context.subscriptions.push(this.statusbaritem);
         // setcontext
-        vscode.commands.executeCommand('setContext', this.appname, this.boxdrawmode);
+        this.setMode(false, true);
+        this.setBold(false, true);
     }
 
     // public interface
-    public async changeBoxdrawMode() {
-        switch (this.boxdrawmode) {
-            case "off": this.boxdrawmode = "normal"; break;
-            case "normal": this.boxdrawmode = "thick"; break;
-            case "thick": this.boxdrawmode = "off"; break;
+    public toggleMode() {
+        this.setMode(!this.mode);
+    }
+    public toggleBold() {
+        this.setBold(!this.bold);
+    }
+    public drawLeft() {
+        this.channel.appendLine(`[${this.timestamp()}] drawLeft`);
+    }
+    public drawRight() {
+        this.channel.appendLine(`[${this.timestamp()}] drawRight`);
+    }
+    public drawUp() {
+        this.channel.appendLine(`[${this.timestamp()}] drawUp`);
+    }
+    public drawDown() {
+        this.channel.appendLine(`[${this.timestamp()}] drawDown`);
+    }
+    public drawLeftArrow() {
+        this.channel.appendLine(`[${this.timestamp()}] drawLeftArrow`);
+    }
+    public drawRightArrow() {
+        this.channel.appendLine(`[${this.timestamp()}] drawRightArrow`);
+    }
+    public drawUpArrow() {
+        this.channel.appendLine(`[${this.timestamp()}] drawUpArrow`);
+    }
+    public drawDownArrow() {
+        this.channel.appendLine(`[${this.timestamp()}] drawDownArrow`);
+    }
+    public clearLeft() {
+        this.channel.appendLine(`[${this.timestamp()}] clearLeft`);
+    }
+    public clearRight() {
+        this.channel.appendLine(`[${this.timestamp()}] clearRight`);
+    }
+    public clearUp() {
+        this.channel.appendLine(`[${this.timestamp()}] clearUp`);
+    }
+    public clearDown() {
+        this.channel.appendLine(`[${this.timestamp()}] clearDown`);
+    }
+
+    // model
+    protected setMode(mode: boolean, force = false) {
+        if (this.mode != mode || force) {
+            this.mode = mode;
+            vscode.commands.executeCommand('setContext', `$(this.appname)Mode`, this.mode);
+            this.channel.appendLine(`[${this.timestamp()}] mode=${this.mode}`);
+            this.updateStatusbar();
         }
-        this.channel.appendLine(`[${this.timestamp()}] boxdraw-mode: ${this.boxdrawmode} `);
-        vscode.commands.executeCommand('setContext', this.appname, this.boxdrawmode);
-        this.statusbaritem.text = `${this.applabel}: ${this.boxdrawmode}`;
+    }
+    protected setBold(bold: boolean, force = false) {
+        if (this.bold != bold || force) {
+            this.bold = bold;
+            vscode.commands.executeCommand('setContext', `$(this.appname)Bold`, this.bold);
+            this.channel.appendLine(`[${this.timestamp()}] bold=${this.bold}`);
+            this.updateStatusbar();
+        }
+    }
+    protected updateStatusbar() {
+        let msg = this.applabel;
+        if (this.bold) msg += "(bold)";
+        if (this.mode) msg += "$(edit)";
+        this.statusbaritem.text = msg;
     }
 
     // utility
