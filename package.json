@@ -1,0 +1,63 @@
+{
+  "name": "boxdraw-extension",
+  "displayName": "Boxdraw",
+  "description": "vscode boxdraw extension",
+  "version": "0.0.0",
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.55.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "publisher": "taizod1024",
+  "main": "./build/extension.js",
+  "activationEvents": [
+    "onCommand:boxdraw-extension.toggleBoxdrawMode"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "boxdraw-extension.toggleBoxdrawMode",
+        "title": "Boxdraw: Toggle Boxdraw Mode"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./build/test/runTest.js",
+    "release": "git switch main && git merge --no-ff develop && npx standard-version && vsce publish && git push --follow-tags origin main && git push origin develop && git switch develop"
+  },
+  "author": "yamamoto.taizo <taizod1024@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@commitlint/cli": "^12.1.1",
+    "@commitlint/config-conventional": "^12.1.1",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^12.20.15",
+    "@types/superagent": "^4.1.10",
+    "@types/superagent-proxy": "^2.0.0",
+    "@types/vscode": "^1.55.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "bufferutil": "^4.0.3",
+    "eslint": "^7.19.0",
+    "generator-code": "^1.4.13",
+    "husky": "^6.0.0",
+    "mocha": "^8.3.2",
+    "standard-version": "^9.2.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.3.2",
+    "utf-8-validate": "^5.0.5",
+    "vscode": "^0.9.9",
+    "vscode-test": "^1.5.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taizod1024/boxdraw-extension.git"
+  }
+}
