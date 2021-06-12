@@ -43,6 +43,18 @@ class BoxdrawExtension {
         // command
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleMode`, () => { boxdrawextension.toggleMode(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleBold`, () => { boxdrawextension.toggleBold(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeft`, () => { boxdrawextension.drawLeft(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRight`, () => { boxdrawextension.drawRight(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUp`, () => { boxdrawextension.drawUp(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDown`, () => { boxdrawextension.drawDown(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeftArrow`, () => { boxdrawextension.drawLeftArrow(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRightArrow`, () => { boxdrawextension.drawRightArrow(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUpArrow`, () => { boxdrawextension.drawUpArrow(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDownArrow`, () => { boxdrawextension.drawDownArrow(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearLeft`, () => { boxdrawextension.clearLeft(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearRight`, () => { boxdrawextension.clearRight(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearUp`, () => { boxdrawextension.clearUp(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearDown`, () => { boxdrawextension.clearDown(); }));
         // statusbar
         this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         this.statusbaritem.command = `${this.appid}.toggleMode`;
@@ -101,7 +113,7 @@ class BoxdrawExtension {
     protected setMode(mode: boolean, force = false) {
         if (this.mode != mode || force) {
             this.mode = mode;
-            vscode.commands.executeCommand('setContext', `$(this.appname)Mode`, this.mode);
+            vscode.commands.executeCommand('setContext', `${this.appname}Mode`, this.mode);
             this.channel.appendLine(`[${this.timestamp()}] mode=${this.mode}`);
             this.updateStatusbar();
         }
@@ -109,7 +121,7 @@ class BoxdrawExtension {
     protected setBold(bold: boolean, force = false) {
         if (this.bold != bold || force) {
             this.bold = bold;
-            vscode.commands.executeCommand('setContext', `$(this.appname)Bold`, this.bold);
+            vscode.commands.executeCommand('setContext', `${this.appname}Bold`, this.bold);
             this.channel.appendLine(`[${this.timestamp()}] bold=${this.bold}`);
             this.updateStatusbar();
         }
