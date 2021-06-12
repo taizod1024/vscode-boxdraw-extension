@@ -47,11 +47,13 @@ class BoxdrawExtension {
             });
         }));
         // statusbar
-        this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+        this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         this.statusbaritem.command = commandid;
-        this.statusbaritem.text = `boxdraw:${this.boxdrawmode}`;
+        this.statusbaritem.text = `${this.applabel}: ${this.boxdrawmode}`;
         this.statusbaritem.show();
         context.subscriptions.push(this.statusbaritem);
+        // setcontext
+        vscode.commands.executeCommand('setContext', this.appname, this.boxdrawmode);
     }
 
     // public interface
@@ -62,6 +64,7 @@ class BoxdrawExtension {
             case "thick": this.boxdrawmode = "off"; break;
         }
         this.channel.appendLine(`[${this.timestamp()}] boxdraw-mode: ${this.boxdrawmode} `);
+        vscode.commands.executeCommand('setContext', this.appname, this.boxdrawmode);
         this.statusbaritem.text = `${this.applabel}: ${this.boxdrawmode}`;
     }
 

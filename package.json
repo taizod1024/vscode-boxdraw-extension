@@ -13,13 +13,20 @@
   "publisher": "taizod1024",
   "main": "./build/extension.js",
   "activationEvents": [
-    "onCommand:boxdraw-extension.changeBoxdrawMode"
+    "*"
   ],
   "contributes": {
     "commands": [
       {
         "command": "boxdraw-extension.changeBoxdrawMode",
         "title": "Boxdraw: Change Boxdraw Mode"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "boxdraw-extension.changeBoxdrawMode",
+        "key": "ctrl+right",
+        "when": "boxdraw != 'off'"
       }
     ]
   },
