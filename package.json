@@ -13,13 +13,13 @@
   "publisher": "taizod1024",
   "main": "./build/extension.js",
   "activationEvents": [
-    "onCommand:boxdraw-extension.toggleBoxdrawMode"
+    "onCommand:boxdraw-extension.changeBoxdrawMode"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "boxdraw-extension.toggleBoxdrawMode",
-        "title": "Boxdraw: Toggle Boxdraw Mode"
+        "command": "boxdraw-extension.changeBoxdrawMode",
+        "title": "Boxdraw: Change Boxdraw Mode"
       }
     ]
   },
