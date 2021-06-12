@@ -86,62 +86,62 @@
       {
         "command": "boxdraw-extension.drawLeft",
         "key": "ctrl+left",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawRight",
         "key": "ctrl+right",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawUp",
         "key": "ctrl+up",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawDown",
         "key": "ctrl+down",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawLeftArrow",
         "key": "ctrl+alt+left",
-        "when": "boxdrawMode" 
+        "when": "editorTextFocus && boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawRightArrow",
         "key": "ctrl+alt+right",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawUpArrow",
         "key": "ctrl+alt+up",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawDownArrow",
         "key": "ctrl+alt+down",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.clearLeft",
         "key": "ctrl+shift+left",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.clearRight",
         "key": "ctrl+shift+right",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.clearUp",
         "key": "ctrl+shift+up",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.clearDown",
         "key": "ctrl+shift+down",
-        "when": "boxdrawMode" 
+        "when": "boxdrawMode"
       }
     ]
   },
@@ -181,5 +181,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/taizod1024/boxdraw-extension.git"
+  },
+  "dependencies": {
+    "eastasianwidth": "^0.2.0"
   }
 }
