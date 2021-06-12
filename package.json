@@ -41,7 +41,7 @@
     "@types/node": "^12.20.15",
     "@types/superagent": "^4.1.10",
     "@types/superagent-proxy": "^2.0.0",
-    "@types/vscode": "^1.55.0",
+    "@types/vscode": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
     "bufferutil": "^4.0.3",
@@ -54,7 +54,7 @@
     "typescript": "^4.3.2",
     "utf-8-validate": "^5.0.5",
     "vscode": "^0.9.9",
-    "vscode-test": "^1.5.0"
+    "vscode-test": "^1.5.2"
   },
   "repository": {
     "type": "git",
