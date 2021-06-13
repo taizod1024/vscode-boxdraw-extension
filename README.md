@@ -16,5 +16,5 @@ wip
 
 ## thanks
 
-The basic idea is inspired by xyzzy boxdraw.l .
+- The basic idea is inspired by xyzzy boxdraw.l .
 
