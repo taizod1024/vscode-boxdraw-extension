@@ -1,87 +1,208 @@
 import * as vscode from 'vscode';
 var eaw = require('eastasianwidth');
 
-// TODO vscodeのフォント設定に大きく依存、monospace推奨
-// TODO 罫線はvscodeだと半角扱いの模様、貢献する機会あり、eawとして全角扱いにした方がよい
-// TODO 罫線はやめて全角扱いされている＋－｜でやった方がよいかも
-// TODO 罫線でくっつけたかったらlineheight14推奨
+// # 備忘
+// - 罫線文字のうち、JISX0213に入っているものは表示上は全角、それ以外は半角、それもフォントに依存
+// - vscodeの全角文字判定は簡易的。罫線文字は半角扱いになっているため。
+// - cursorDownは最下行では行末に移動する動きは実装しない
+// - cursorUpSelect/cursorDownSelectは実装しない
 
 // extension core
 class Location {
-    public line: number;
+    // property
+    public row: number;
     public column: number;
-    constructor(line: number, column: number) {
-        this.line = line;
+    protected lineEnd: vscode.Position;
+    protected missing: number;
+    public curChar: string;
+    public prevChar: string;
+    public nextChar: string;
+    // constructor
+    constructor(row: number, column: number) {
+        this.row = row;
         this.column = column;
+        this.lineEnd = null;
+        this.missing = 0;
+        this.curChar = "";
+        this.prevChar = "";
+        this.nextChar = "";
     }
-    public static from(document: vscode.TextDocument, current: vscode.Position): Location {
+    // position to location
+    public static getActive(): Location {
+        const editor = vscode.window.activeTextEditor;
+        const document = editor.document;
+        const current = editor.selection.active;
         let bol = new vscode.Position(current.line, 0);
         let range = new vscode.Range(bol, current);
         let text = document.getText(range);
-        let newloc = new Location(current.line, eaw.length(text));
-        return newloc;
+        let location = new Location(current.line, eaw.length(text));
+        return location;
     }
-    public write(text: string) {
+    // get position
+
+    // location to position
+    public getPosition(fulfill = false) {
+
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
-        return editor.edit((builder: vscode.TextEditorEdit) => {
-            // param
-            let columnx: number;
-            let charx: number;
-            let textx: string;
-            let charl: number, charr: number;
-            let curpos = new vscode.Position(editor.selection.active.line, editor.selection.active.character);
-            // complete line
-            if (document.lineCount < this.line) {
-                var lastline = document.lineAt(document.lineCount - 1);
-                builder.insert(lastline.range.end, "\n".repeat(document.lineCount - this.line + 1));
-            }
-            // complete whole line
-            let linetext = document.lineAt(this.line).text;
-            let columnl = eaw.length(linetext);
-            if (columnl < this.column + 2) {
-                linetext += "*".repeat(this.column - columnl + 2);
-            }
-            // calc charx, columnx
-            let textn = linetext.split("").map(x => eaw.length(x));
-            for (columnx = 0, charx = 0; charx < textn.length + 2; charx++) {
-                if (this.column <= columnx) break;
-                columnx += textn[charx];
-            }
-            // calc charl, charr, textx
-            if (this.column == columnx) {
-                if (textn[charx] == 2) {
-                    charl = charx;
-                    charr = charx + 1;
-                    textx = text;
-                } else if (textn[charx + 1] == 1) {
-                    charl = charx;
-                    charr = charx + 2;
-                    textx = text;
+
+        // init property
+        this.lineEnd = null;
+        this.missing = 0;
+        this.curChar = "";
+        this.prevChar = "";
+        this.nextChar = "";
+
+        // validation
+        if (this.row < 0) return null;
+        if (this.row >= document.lineCount) return null;
+
+        // get line
+        const line = document.lineAt(this.row);
+        this.lineEnd = line.range.end;
+
+        // calc character
+        let chars = line.text.split("");
+        let column = 0;
+        let character = 0;
+        while (true) {
+            if (column == this.column) break;
+            if (column > this.column) break;
+            if (character >= chars.length) break;
+            column += eaw.characterLength(chars[character]);
+            character++
+        }
+
+        // valid column
+        if (column == this.column) {
+
+            // treat as full-width
+            if (character > 0) this.prevChar = chars[character - 1];
+            if (character < chars.length) this.curChar = chars[character];
+            if (character + 1 < chars.length) this.nextChar = chars[character + 1];
+
+            // check for half-width
+            if (eaw.characterLength(this.curChar) == 1) {
+                if (eaw.characterLength(this.nextChar) == 1) {
+                    this.curChar += this.nextChar;
+                    if (character + 2 < chars.length) this.nextChar = chars[character + 2]; // valid column+2
+                    else this.nextChar = ""; // valid column+2, but there is no more
                 } else {
-                    charl = charx;
-                    charr = charx + 2;
-                    textx = text + " ";
-                }
-            } else {
-                if (textn[charx] == 1) {
-                    charl = charx - 1;
-                    charr = charx + 1
-                    textx = " " + text;
-                } else {
-                    charl = charx - 1;
-                    charr = charx + 1
-                    textx = " " + text + " ";
+                    this.nextChar = ""; // invalid column+1
                 }
             }
-            // replace
-            const posl = new vscode.Position(this.line, charl);
-            const posr = new vscode.Position(this.line, charr);
-            const range = new vscode.Range(posl, posr);
-            builder.replace(range, textx);
-            editor.selection = new vscode.Selection(curpos, curpos);
+        }
+
+        // fulfill
+        if (fulfill) {
+            this.missing = (column < this.column) ? this.column - column : 0;
+        }
+        let pos = new vscode.Position(this.row, character + this.missing);
+        return pos;
+    }
+    public gotoLocation(fulfill = false) {
+        const editor = vscode.window.activeTextEditor;
+        const document = editor.document;
+        let pos = this.getPosition(fulfill);
+        if (fulfill) {
+            // return after insertion
+            return editor.edit(builder => {
+                builder.insert(this.lineEnd, " ".repeat(this.missing));
+                editor.selection = new vscode.Selection(pos, pos);
+            });
+        } else {
+            // return immediately
+            editor.selection = new vscode.Selection(pos, pos);
+            return null;
+        }
+    }
+    // previous line
+    public backwardLine(fulfill = false) {
+        const editor = vscode.window.activeTextEditor;
+        return editor.edit(() => {
+            if (this.row > 0) {
+                this.row--;
+                this.gotoLocation(fulfill);
+            }
         });
     }
+    // next line
+    public forwardLine(fulfill = false) {
+        const editor = vscode.window.activeTextEditor;
+        const document = editor.document;
+        return editor.edit(builder => {
+            this.row++;
+            if (this.row < document.lineCount) {
+                this.gotoLocation(fulfill);
+            } else if (fulfill) {
+                const line = document.lineAt(document.lineCount - 1);
+                builder.insert(line.range.end, "\n" + " ".repeat(this.column));
+                const pos = new vscode.Position(this.row, this.column);
+                editor.selection = new vscode.Selection(pos, pos);
+            }
+        });
+    }
+    // public write(text: string) {
+    //     const editor = vscode.window.activeTextEditor;
+    //     const document = editor.document;
+    //     return editor.edit((builder: vscode.TextEditorEdit) => {
+    //         // param
+    //         let columnx: number;
+    //         let charx: number;
+    //         let textx: string;
+    //         let charl: number, charr: number;
+    //         let curpos = new vscode.Position(editor.selection.active.line, editor.selection.active.character);
+    //         // complete line
+    //         if (document.lineCount < this.row) {
+    //             var lastline = document.lineAt(document.lineCount - 1);
+    //             builder.insert(lastline.range.end, "\n".repeat(document.lineCount - this.row + 1));
+    //         }
+    //         // complete whole line
+    //         let linetext = document.lineAt(this.row).text;
+    //         let columnl = eaw.length(linetext);
+    //         if (columnl < this.column + 2) {
+    //             linetext += "*".repeat(this.column - columnl + 2);
+    //         }
+    //         // calc charx, columnx
+    //         let textn = linetext.split("").map(x => eaw.length(x));
+    //         for (columnx = 0, charx = 0; charx < textn.length + 2; charx++) {
+    //             if (this.column <= columnx) break;
+    //             columnx += textn[charx];
+    //         }
+    //         // calc charl, charr, textx
+    //         if (this.column == columnx) {
+    //             if (textn[charx] == 2) {
+    //                 charl = charx;
+    //                 charr = charx + 1;
+    //                 textx = text;
+    //             } else if (textn[charx + 1] == 1) {
+    //                 charl = charx;
+    //                 charr = charx + 2;
+    //                 textx = text;
+    //             } else {
+    //                 charl = charx;
+    //                 charr = charx + 2;
+    //                 textx = text + " ";
+    //             }
+    //         } else {
+    //             if (textn[charx] == 1) {
+    //                 charl = charx - 1;
+    //                 charr = charx + 1
+    //                 textx = " " + text;
+    //             } else {
+    //                 charl = charx - 1;
+    //                 charr = charx + 1
+    //                 textx = " " + text + " ";
+    //             }
+    //         }
+    //         // replace
+    //         const posl = new vscode.Position(this.row, charl);
+    //         const posr = new vscode.Position(this.row, charr);
+    //         const range = new vscode.Range(posl, posr);
+    //         builder.replace(range, textx);
+    //         editor.selection = new vscode.Selection(curpos, curpos);
+    //     });
+    // }
 }
 class BoxdrawExtension {
 
@@ -175,24 +296,28 @@ class BoxdrawExtension {
         this.bold = false;
 
         // init vscode
+
         // command
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleMode`, () => { boxdrawextension.toggleMode(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleBold`, () => { boxdrawextension.toggleBold(); }));
+
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorUp`, () => { boxdrawextension.cursorUp(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorDown`, () => { boxdrawextension.cursorDown(); }));
 
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeft`, () => { boxdrawextension.drawLeft(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRight`, () => { boxdrawextension.drawRight(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUp`, () => { boxdrawextension.drawUp(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDown`, () => { boxdrawextension.drawDown(); }));
 
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeftArrow`, () => { boxdrawextension.drawLeftArrow(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRightArrow`, () => { boxdrawextension.drawRightArrow(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUpArrow`, () => { boxdrawextension.drawUpArrow(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDownArrow`, () => { boxdrawextension.drawDownArrow(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeftArrow`, () => { boxdrawextension.drawLeftArrow(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRightArrow`, () => { boxdrawextension.drawRightArrow(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUpArrow`, () => { boxdrawextension.drawUpArrow(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDownArrow`, () => { boxdrawextension.drawDownArrow(); }));
 
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearLeft`, () => { boxdrawextension.clearLeft(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearRight`, () => { boxdrawextension.clearRight(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearUp`, () => { boxdrawextension.clearUp(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearDown`, () => { boxdrawextension.clearDown(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearLeft`, () => { boxdrawextension.clearLeft(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearRight`, () => { boxdrawextension.clearRight(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearUp`, () => { boxdrawextension.clearUp(); }));
+        // context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearDown`, () => { boxdrawextension.clearDown(); }));
 
         // statusbar
         this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -209,20 +334,27 @@ class BoxdrawExtension {
     public toggleMode() { this.setMode(!this.mode); }
     public toggleBold() { this.setBold(!this.bold); }
 
+    public cursorUp() {
+        Location.getActive().backwardLine(true);
+    }
+    public cursorDown() {
+        Location.getActive().forwardLine(true);
+    }
+
     public drawLeft() { this.drawBox(0b00000001, "left", false, false); }
     public drawRight() { this.drawBox(0b00000010, "right", false, false); }
     public drawUp() { this.drawBox(0b00000100, "up", false, false); }
     public drawDown() { this.drawBox(0b00001000, "down", false, false); }
 
-    public drawLeftArrow() { this.drawBox(0b00000001, "left", true, false); }
-    public drawRightArrow() { this.drawBox(0b00000010, "right", true, false); }
-    public drawUpArrow() { this.drawBox(0b00000100, "up", true, false); }
-    public drawDownArrow() { this.drawBox(0b00001000, "down", true, false); }
+    // public drawLeftArrow() { this.drawBox(0b00000001, "left", true, false); }
+    // public drawRightArrow() { this.drawBox(0b00000010, "right", true, false); }
+    // public drawUpArrow() { this.drawBox(0b00000100, "up", true, false); }
+    // public drawDownArrow() { this.drawBox(0b00001000, "down", true, false); }
 
-    public clearLeft() { this.drawBox(0b00000001, "left", false, true); }
-    public clearRight() { this.drawBox(0b00000010, "right", false, true); }
-    public clearUp() { this.drawBox(0b00000100, "up", false, true); }
-    public clearDown() { this.drawBox(0b00001000, "down", false, true); }
+    // public clearLeft() { this.drawBox(0b00000001, "left", false, true); }
+    // public clearRight() { this.drawBox(0b00000010, "right", false, true); }
+    // public clearUp() { this.drawBox(0b00000100, "up", false, true); }
+    // public clearDown() { this.drawBox(0b00001000, "down", false, true); }
 
     // inner interface
     protected drawBox(pattern: number, direction: string, isarrow: boolean, isclear: boolean) {
@@ -231,18 +363,26 @@ class BoxdrawExtension {
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
         // check text
-        const document = editor.document;
-        const selection = editor.selection;
-        const curpos = selection.active;
-        // edit
-        Location.from(document, curpos).write("＋").then(() => {
-            switch (direction) {
-                case "left": vscode.commands.executeCommand("cursorLeft"); break;
-                case "right": vscode.commands.executeCommand("cursorRight"); break;
-                case "up": vscode.commands.executeCommand("cursorUp"); break;
-                case "down": vscode.commands.executeCommand("cursorDown"); break;
-            }
-        });
+        const curpos = Location.getActive();
+        const prevpos = new Location(curpos.row - 1, curpos.column);
+        const nextpos = new Location(curpos.row + 1, curpos.column);
+        curpos.getPosition();
+        prevpos.getPosition();
+        nextpos.getPosition();
+        this.channel.appendLine(
+            "--------\n" +
+            "[" + prevpos.prevChar + "][" + prevpos.curChar + "][" + prevpos.nextChar + "]\n" +
+            "[" + curpos.prevChar + "][" + curpos.curChar + "][" + curpos.nextChar + "]\n" +
+            "[" + nextpos.prevChar + "][" + nextpos.curChar + "][" + nextpos.nextChar + "]\n");
+        // // edit
+        // Location.from(document, curpos).write("＋").then(() => {
+        //     switch (direction) {
+        //         case "left": vscode.commands.executeCommand("cursorLeft"); break;
+        //         case "right": vscode.commands.executeCommand("cursorRight"); break;
+        //         case "up": vscode.commands.executeCommand("cursorUp"); break;
+        //         case "down": vscode.commands.executeCommand("cursorDown"); break;
+        //     }
+        // });
     }
 
     // ops vscoide

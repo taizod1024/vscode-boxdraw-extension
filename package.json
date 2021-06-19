@@ -26,6 +26,14 @@
         "title": "Boxdraw: Toggle Bold"
       },
       {
+        "command": "boxdraw-extension.cursorUp",
+        "title": "Boxdraw: previous line"
+      },
+      {
+        "command": "boxdraw-extension.cursorDown",
+        "title": "Boxdraw: next line"
+      },
+      {
         "command": "boxdraw-extension.drawLeft",
         "title": "Boxdraw: Draw Left"
       },
@@ -82,6 +90,16 @@
       {
         "command": "boxdraw-extension.toggleBold",
         "key": "ctrl+alt+b"
+      },
+      {
+        "command": "boxdraw-extension.cursorUp",
+        "key": "up",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.cursorDown",
+        "key": "down",
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw-extension.drawLeft",
