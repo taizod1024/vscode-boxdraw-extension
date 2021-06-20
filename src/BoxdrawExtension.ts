@@ -8,37 +8,48 @@ var eaw = require('eastasianwidth');
 // - cursorUpSelect/cursorDownSelectは実装しない
 
 // extension core
-class Location {
+class CPosition {
     // property
-    public row: number;
+    public line: number;
     public column: number;
-    protected lineEnd: vscode.Position;
-    protected missing: number;
-    public curChar: string;
-    public prevChar: string;
-    public nextChar: string;
+    protected lineendpos: vscode.Position;
+    protected fulfillblank: number;
+    public ctxt: string;
+    public ptxt: string;
+    public ntxt: string;
+    protected rbgnchr: number;
+    protected rendchr: number;
+    protected rbgntxt: string;
+    protected rendtxt: string;
     // constructor
-    constructor(row: number, column: number) {
-        this.row = row;
+    constructor(line: number, column: number) {
+        this.line = line;
         this.column = column;
-        this.lineEnd = null;
-        this.missing = 0;
-        this.curChar = "";
-        this.prevChar = "";
-        this.nextChar = "";
+        this.initInner();
     }
     // position to location
-    public static getActive(): Location {
+    public static getActive(): CPosition {
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
         const current = editor.selection.active;
         let bol = new vscode.Position(current.line, 0);
         let range = new vscode.Range(bol, current);
         let text = document.getText(range);
-        let location = new Location(current.line, eaw.length(text));
+        let location = new CPosition(current.line, eaw.length(text));
         return location;
     }
-    // get position
+    // init property
+    protected initInner() {
+        this.lineendpos = null;
+        this.fulfillblank = 0;
+        this.ctxt = "";
+        this.ptxt = "";
+        this.ntxt = "";
+        this.rbgnchr = 0;
+        this.rendchr = 0;
+        this.rbgntxt = "";
+        this.rendtxt = "";
+    }
 
     // location to position
     public getPosition(fulfill = false) {
@@ -47,19 +58,15 @@ class Location {
         const document = editor.document;
 
         // init property
-        this.lineEnd = null;
-        this.missing = 0;
-        this.curChar = "";
-        this.prevChar = "";
-        this.nextChar = "";
+        this.initInner();
 
         // validation
-        if (this.row < 0) return null;
-        if (this.row >= document.lineCount) return null;
+        if (this.line < 0) return null;
+        if (this.line >= document.lineCount) return null;
 
         // get line
-        const line = document.lineAt(this.row);
-        this.lineEnd = line.range.end;
+        const line = document.lineAt(this.line);
+        this.lineendpos = line.range.end;
 
         // calc character
         let chars = line.text.split("");
@@ -77,27 +84,29 @@ class Location {
         if (column == this.column) {
 
             // treat as full-width
-            if (character > 0) this.prevChar = chars[character - 1];
-            if (character < chars.length) this.curChar = chars[character];
-            if (character + 1 < chars.length) this.nextChar = chars[character + 1];
+            if (character > 0) this.ptxt = chars[character - 1];
+            if (character < chars.length) this.ctxt = chars[character];
+            if (character + 1 < chars.length) this.ntxt = chars[character + 1];
 
             // check for half-width
-            if (eaw.characterLength(this.curChar) == 1) {
-                if (eaw.characterLength(this.nextChar) == 1) {
-                    this.curChar += this.nextChar;
-                    if (character + 2 < chars.length) this.nextChar = chars[character + 2]; // valid column+2
-                    else this.nextChar = ""; // valid column+2, but there is no more
+            if (eaw.characterLength(this.ctxt) == 1) {
+                if (eaw.characterLength(this.ntxt) == 1) {
+                    this.ctxt += this.ntxt;
+                    if (character + 2 < chars.length) this.ntxt = chars[character + 2]; // valid column+2
+                    else this.ntxt = ""; // valid column+2, but there is no more
                 } else {
-                    this.nextChar = ""; // invalid column+1
+                    this.ntxt = ""; // invalid column+1
                 }
             }
         }
 
         // fulfill
         if (fulfill) {
-            this.missing = (column < this.column) ? this.column - column : 0;
+            this.fulfillblank = (column < this.column) ? this.column - column : 0;
         }
-        let pos = new vscode.Position(this.row, character + this.missing);
+
+        // 
+        let pos = new vscode.Position(this.line, character + this.fulfillblank);
         return pos;
     }
     public gotoLocation(fulfill = false) {
@@ -107,7 +116,7 @@ class Location {
         if (fulfill) {
             // return after insertion
             return editor.edit(builder => {
-                builder.insert(this.lineEnd, " ".repeat(this.missing));
+                builder.insert(this.lineendpos, " ".repeat(this.fulfillblank));
                 editor.selection = new vscode.Selection(pos, pos);
             });
         } else {
@@ -120,8 +129,8 @@ class Location {
     public backwardLine(fulfill = false) {
         const editor = vscode.window.activeTextEditor;
         return editor.edit(() => {
-            if (this.row > 0) {
-                this.row--;
+            if (this.line > 0) {
+                this.line--;
                 this.gotoLocation(fulfill);
             }
         });
@@ -131,13 +140,13 @@ class Location {
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
         return editor.edit(builder => {
-            this.row++;
-            if (this.row < document.lineCount) {
+            this.line++;
+            if (this.line < document.lineCount) {
                 this.gotoLocation(fulfill);
             } else if (fulfill) {
                 const line = document.lineAt(document.lineCount - 1);
                 builder.insert(line.range.end, "\n" + " ".repeat(this.column));
-                const pos = new vscode.Position(this.row, this.column);
+                const pos = new vscode.Position(this.line, this.column);
                 editor.selection = new vscode.Selection(pos, pos);
             }
         });
@@ -335,10 +344,10 @@ class BoxdrawExtension {
     public toggleBold() { this.setBold(!this.bold); }
 
     public cursorUp() {
-        Location.getActive().backwardLine(true);
+        CPosition.getActive().backwardLine(true);
     }
     public cursorDown() {
-        Location.getActive().forwardLine(true);
+        CPosition.getActive().forwardLine(true);
     }
 
     public drawLeft() { this.drawBox(0b00000001, "left", false, false); }
@@ -363,17 +372,17 @@ class BoxdrawExtension {
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
         // check text
-        const curpos = Location.getActive();
-        const prevpos = new Location(curpos.row - 1, curpos.column);
-        const nextpos = new Location(curpos.row + 1, curpos.column);
+        const curpos = CPosition.getActive();
+        const prevpos = new CPosition(curpos.line - 1, curpos.column);
+        const nextpos = new CPosition(curpos.line + 1, curpos.column);
         curpos.getPosition();
         prevpos.getPosition();
         nextpos.getPosition();
         this.channel.appendLine(
             "--------\n" +
-            "[" + prevpos.prevChar + "][" + prevpos.curChar + "][" + prevpos.nextChar + "]\n" +
-            "[" + curpos.prevChar + "][" + curpos.curChar + "][" + curpos.nextChar + "]\n" +
-            "[" + nextpos.prevChar + "][" + nextpos.curChar + "][" + nextpos.nextChar + "]\n");
+            "[" + prevpos.ptxt + "][" + prevpos.ctxt + "][" + prevpos.ntxt + "]\n" +
+            "[" + curpos.ptxt + "][" + curpos.ctxt + "][" + curpos.ntxt + "]\n" +
+            "[" + nextpos.ptxt + "][" + nextpos.ctxt + "][" + nextpos.ntxt + "]\n");
         // // edit
         // Location.from(document, curpos).write("＋").then(() => {
         //     switch (direction) {
