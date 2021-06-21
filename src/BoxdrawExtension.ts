@@ -17,10 +17,10 @@ class CPosition {
     public ctxt: string;
     public ptxt: string;
     public ntxt: string;
-    protected rbgnchr: number;
-    protected rendchr: number;
-    protected rbgntxt: string;
-    protected rendtxt: string;
+    public rbgnchr: number;
+    public rendchr: number;
+    public rbgntxt: string;
+    public rendtxt: string;
     // constructor
     constructor(line: number, column: number) {
         this.line = line;
@@ -73,40 +73,44 @@ class CPosition {
         let column = 0;
         let character = 0;
         while (true) {
-            if (column == this.column) break;
-            if (column > this.column) break;
+            if (column == this.column) {
+                if (character > 0) this.ptxt = chars[character - 1];
+                this.rbgnchr = character;
+                break;
+            }
+            if (column > this.column) {
+                this.rbgnchr = character - 1;
+                this.rbgntxt = " ";
+                break;
+            }
             if (character >= chars.length) break;
             column += eaw.characterLength(chars[character]);
             character++
         }
-
-        // valid column
-        if (column == this.column) {
-
-            // treat as full-width
-            if (character > 0) this.ptxt = chars[character - 1];
-            if (character < chars.length) this.ctxt = chars[character];
-            if (character + 1 < chars.length) this.ntxt = chars[character + 1];
-
-            // check for half-width
-            if (eaw.characterLength(this.ctxt) == 1) {
-                if (eaw.characterLength(this.ntxt) == 1) {
-                    this.ctxt += this.ntxt;
-                    if (character + 2 < chars.length) this.ntxt = chars[character + 2]; // valid column+2
-                    else this.ntxt = ""; // valid column+2, but there is no more
-                } else {
-                    this.ntxt = ""; // invalid column+1
-                }
+        this.rendchr = character;
+        while (true) {
+            if (column == this.column + 2) {
+                if (character < chars.length) this.ntxt = chars[character];
+                this.rendchr = character;
+                break;
             }
+            if (column > this.column + 2) {
+                this.rendchr = character;
+                this.rendtxt = " ";
+                break;
+            }
+            if (character >= chars.length) break;
+            this.ctxt += chars[character];
+            column += eaw.characterLength(chars[character]);
+            character++
         }
 
-        // fulfill
-        if (fulfill) {
-            this.fulfillblank = (column < this.column) ? this.column - column : 0;
-        }
+        // // fulfill
+        // if (fulfill) {
+        //     this.fulfillblank = (column < this.column) ? this.column - column : 0;
+        // }
 
-        // 
-        let pos = new vscode.Position(this.line, character + this.fulfillblank);
+        let pos = new vscode.Position(this.line, this.rbgnchr + this.fulfillblank);
         return pos;
     }
     public gotoLocation(fulfill = false) {
@@ -383,6 +387,16 @@ class BoxdrawExtension {
             "[" + prevpos.ptxt + "][" + prevpos.ctxt + "][" + prevpos.ntxt + "]\n" +
             "[" + curpos.ptxt + "][" + curpos.ctxt + "][" + curpos.ntxt + "]\n" +
             "[" + nextpos.ptxt + "][" + nextpos.ctxt + "][" + nextpos.ntxt + "]\n");
+        this.channel.appendLine("'" + curpos.rbgntxt + "'" + curpos.rendtxt + " " + curpos.rbgnchr + "," + curpos.rendchr)
+
+        editor.edit(builder => {
+            const posbgn = new vscode.Position(curpos.line, curpos.rbgnchr);
+            const posend = new vscode.Position(curpos.line, curpos.rendchr);
+            const range = new vscode.Range(posbgn, posend);
+            builder.replace(range, curpos.rbgntxt + "■" + curpos.rendtxt);
+            editor.selection = new vscode.Selection(posbgn, posbgn);
+        });
+
         // // edit
         // Location.from(document, curpos).write("＋").then(() => {
         //     switch (direction) {
