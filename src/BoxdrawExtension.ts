@@ -68,7 +68,7 @@ class CPosition {
         const line = document.lineAt(this.line);
         this.lineendpos = line.range.end;
 
-        // calc character
+        // calc character begin
         let chars = line.text.split("");
         let column = 0;
         let character = 0;
@@ -87,6 +87,8 @@ class CPosition {
             column += eaw.characterLength(chars[character]);
             character++
         }
+
+        // calc character end
         this.rendchr = character;
         while (true) {
             if (column == this.column + 2) {
@@ -105,10 +107,10 @@ class CPosition {
             character++
         }
 
-        // // fulfill
-        // if (fulfill) {
-        //     this.fulfillblank = (column < this.column) ? this.column - column : 0;
-        // }
+        // fulfill
+        if (fulfill) {
+            this.fulfillblank = (column < this.column) ? this.column - column : 0;
+        }
 
         let pos = new vscode.Position(this.line, this.rbgnchr + this.fulfillblank);
         return pos;
@@ -230,7 +232,6 @@ class BoxdrawExtension {
 
     // context
     public mode: boolean;
-    public bold: boolean;
 
     // vscode
     public channel: vscode.OutputChannel;
@@ -306,13 +307,11 @@ class BoxdrawExtension {
 
         // init context
         this.mode = false;
-        this.bold = false;
 
         // init vscode
 
         // command
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleMode`, () => { boxdrawextension.toggleMode(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleBold`, () => { boxdrawextension.toggleBold(); }));
 
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorUp`, () => { boxdrawextension.cursorUp(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorDown`, () => { boxdrawextension.cursorDown(); }));
@@ -340,12 +339,10 @@ class BoxdrawExtension {
 
         // setcontext
         this.setMode(false, true);
-        this.setBold(false, true);
     }
 
     // public interface
     public toggleMode() { this.setMode(!this.mode); }
-    public toggleBold() { this.setBold(!this.bold); }
 
     public cursorUp() {
         CPosition.getActive().backwardLine(true);
@@ -417,19 +414,10 @@ class BoxdrawExtension {
             this.updateStatusbar();
         }
     }
-    protected setBold(bold: boolean, force = false) {
-        if (this.bold != bold || force) {
-            this.bold = bold;
-            vscode.commands.executeCommand('setContext', `${this.appname}Bold`, this.bold);
-            this.channel.appendLine(`[${this.timestamp()}] bold=${this.bold}`);
-            this.updateStatusbar();
-        }
-    }
     protected updateStatusbar() {
         let msg = "";
-        msg += this.mode ? "$(edit)" : "$(stop-circle)"
+        msg += this.mode ? "$(edit)" : ""
         msg += this.applabel;
-        msg += this.bold ? "(bold)" : "";
         this.statusbaritem.text = msg;
     }
 
