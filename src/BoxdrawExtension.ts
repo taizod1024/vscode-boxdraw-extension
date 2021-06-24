@@ -12,6 +12,7 @@ var eaw = require('eastasianwidth');
 //      - cursorUpSelect/cursorDownSelectは実装しない
 //      - タブ文字は対象外
 
+// extension main class
 class BoxdrawExtension {
 
     // constant
@@ -165,17 +166,20 @@ class BoxdrawExtension {
         this.channel.appendLine(
             "- <" + ppos.ptxt + "><" + ppos.ctxt + "><" + ppos.ntxt + ">[" + ppos.rbgntxt + "][" + ppos.rendtxt + "]" + ppos.rbgnchr + "," + ppos.rendchr + "\n" +
             "- <" + cpos.ptxt + "><" + cpos.ctxt + "><" + cpos.ntxt + ">[" + cpos.rbgntxt + "][" + cpos.rendtxt + "]" + cpos.rbgnchr + "," + cpos.rendchr + "\n" +
-            "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr + "\n");
+            "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr);
 
         // draw current position
         if (cpos.ctxt != "■") {
 
             editor.edit(builder => {
-                this.channel.appendLine(`[${this.timestamp()}] drawBox#edit1`);
+                this.channel.appendLine(`#edit1`);
                 const posbgn = new vscode.Position(cpos.line, cpos.rbgnchr);
                 const posend = new vscode.Position(cpos.line, cpos.rendchr);
                 const range = new vscode.Range(posbgn, posend);
                 builder.replace(range, cpos.rbgntxt + "■" + cpos.rendtxt);
+            }).then(() => {
+                const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
+                editor.selection = new vscode.Selection(posact, posact);
             });
 
         } else {
@@ -212,28 +216,31 @@ class BoxdrawExtension {
             if (moving) {
 
                 // check next position
-                cpos.gotoPosition(true);
-                ppos.getPosition();
-                cpos.getPosition();
-                npos.getPosition();
+                cpos.gotoPosition(true).then(() => {
 
-                this.channel.appendLine(
-                    "- <" + ppos.ptxt + "><" + ppos.ctxt + "><" + ppos.ntxt + ">[" + ppos.rbgntxt + "][" + ppos.rendtxt + "]" + ppos.rbgnchr + "," + ppos.rendchr + "\n" +
-                    "- <" + cpos.ptxt + "><" + cpos.ctxt + "><" + cpos.ntxt + ">[" + cpos.rbgntxt + "][" + cpos.rendtxt + "]" + cpos.rbgnchr + "," + cpos.rendchr + "\n" +
-                    "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr + "\n");
+                    ppos.getPosition();
+                    cpos.getPosition();
+                    npos.getPosition();
+
+                    this.channel.appendLine(
+                        "- <" + ppos.ptxt + "><" + ppos.ctxt + "><" + ppos.ntxt + ">[" + ppos.rbgntxt + "][" + ppos.rendtxt + "]" + ppos.rbgnchr + "," + ppos.rendchr + "\n" +
+                        "- <" + cpos.ptxt + "><" + cpos.ctxt + "><" + cpos.ntxt + ">[" + cpos.rbgntxt + "][" + cpos.rendtxt + "]" + cpos.rbgnchr + "," + cpos.rendchr + "\n" +
+                        "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr);
 
 
-                // draw next position and move active
-                editor.edit(builder => {
-                this.channel.appendLine(`[${this.timestamp()}] drawBox#edit2`);
-                    if (cpos.ctxt != "■") {
-                        const posbgn = new vscode.Position(cpos.line, cpos.rbgnchr);
-                        const posend = new vscode.Position(cpos.line, cpos.rendchr);
-                        const range = new vscode.Range(posbgn, posend);
-                        builder.replace(range, cpos.rbgntxt + "■" + cpos.rendtxt);
-                    }
-                    const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
-                    editor.selection = new vscode.Selection(posact, posact);
+                    // draw next position and move active
+                    editor.edit(builder => {
+                        this.channel.appendLine(`#edit2`);
+                        if (cpos.ctxt != "■") {
+                            const posbgn = new vscode.Position(cpos.line, cpos.rbgnchr);
+                            const posend = new vscode.Position(cpos.line, cpos.rendchr);
+                            const range = new vscode.Range(posbgn, posend);
+                            builder.replace(range, cpos.rbgntxt + "■" + cpos.rendtxt);
+                        }
+                    }).then(() => {
+                        const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
+                        editor.selection = new vscode.Selection(posact, posact);
+                    });
                 });
             }
         }
@@ -430,7 +437,7 @@ class CPosition {
         if (fulfill) {
             // return after insertion
             return editor.edit(builder => {
-                boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] gotoPosition#edit1`);
+                boxdrawextension.channel.appendLine(`#edit1`);
                 builder.insert(this.lineendpos, " ".repeat(this.fulfillblank));
                 editor.selection = new vscode.Selection(pos, pos);
             });
@@ -448,7 +455,7 @@ class CPosition {
 
         const editor = vscode.window.activeTextEditor;
         return editor.edit(() => {
-            boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] backwardLine#edit1`);
+            boxdrawextension.channel.appendLine(`#edit1`);
             if (this.line > 0) {
                 this.line--;
                 this.gotoPosition(fulfill);
@@ -464,7 +471,7 @@ class CPosition {
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
         return editor.edit(builder => {
-            boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] forwardLine#edit1`);
+            boxdrawextension.channel.appendLine(`#edit1`);
             this.line++;
             if (this.line < document.lineCount) {
                 this.gotoPosition(fulfill);
