@@ -12,23 +12,36 @@ var eaw = require('eastasianwidth');
 //      - タブ文字は対象外
 //      - マルチカーソルは対象外
 
-// extension main class
+/** boxdraw-extesnion class */
 class BoxdrawExtension {
 
     // constant
+
+    /** application name for vscode*/
     public appname: string;
+    /** application id for vscode*/
     public appid: string;
+
+    /** application label for vscode channel output*/
     public applabel: string;
 
     // context
+
+    /** flag for boxdaw */
     public mode: boolean;
+    /** flag for debug  */
     public debug: boolean;
 
     // vscode
+
+    /** channel for log */
     public channel: vscode.OutputChannel;
+    /** statusvar for user */
     public statusbaritem: vscode.StatusBarItem;
 
-    // constructor
+    // method
+
+    /** constructor */
     constructor() {
 
         // init constant
@@ -37,7 +50,7 @@ class BoxdrawExtension {
         this.applabel = "BoxDraw";
     }
 
-    // activate extension
+    /** activate extension */
     public activate(context: vscode.ExtensionContext) {
 
         // init context
@@ -80,7 +93,7 @@ class BoxdrawExtension {
 
     // public interface
 
-    // - mode management
+    /** toggle mode */
     public toggleMode() {
 
         if (this.debug) this.channel.appendLine(`--------`);
@@ -88,7 +101,7 @@ class BoxdrawExtension {
         this.setMode(!this.mode);
     }
 
-    // - move cursor
+    /** move to previous line */
     public cursorUp() {
 
         if (this.debug) this.channel.appendLine(`--------`);
@@ -108,6 +121,8 @@ class BoxdrawExtension {
             }
         });
     }
+
+    /** move to next line */
     public cursorDown() {
 
         if (this.debug) this.channel.appendLine(`--------`);
@@ -126,7 +141,7 @@ class BoxdrawExtension {
         });
     }
 
-    // - draw line, draw arrow, clear line
+    /** draw line, draw arrow, clear line */
     protected drawBox(direction: "left" | "right" | "up" | "down", isarrow = false, isclear = false) {
 
         if (this.debug) this.channel.appendLine(`--------`);
@@ -138,13 +153,14 @@ class BoxdrawExtension {
         if (!editor) return;
 
         // check cursor poscolumn
-        const cpoc = PosColumn.getCursor(); // current poscolumn
+        /** current poscolumn */
+        const cpoc = PosColumn.getCursor();
         const ppoc = new PosColumn(cpoc.line - 1, cpoc.column); // prev poscolumn
         const npoc = new PosColumn(cpoc.line + 1, cpoc.column); // next poscolumn
         ppoc.toPosition();
         cpoc.toPosition();
         npoc.toPosition();
-        let rtxt = this.getReplaceText(ppoc, cpoc, npoc, isarrow, isclear);
+        let rtxt = this.getReplaceText(ppoc, cpoc, npoc, direction, isarrow, isclear);
 
         if (this.debug) this.channel.appendLine(
             "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "]<" + ppoc.rbgnchr + "><" + ppoc.rbgnchr2 + ">" + ppoc.rendchr2 + "," + ppoc.rendchr + "\n" +
@@ -152,7 +168,7 @@ class BoxdrawExtension {
             "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr + "><" + npoc.rbgnchr2 + ">" + npoc.rendchr2 + "," + npoc.rendchr);
 
         // check current position
-        if (cpoc.ctxt != rtxt) {
+        if (this.isReplaceOrNot(cpoc, rtxt, direction, isarrow, isclear)) {
 
             // draw current position
             editor.edit(builder => {
@@ -224,7 +240,7 @@ class BoxdrawExtension {
 
                 }
                 // check next position
-                else if (cpoc.ctxt != rtxt) {
+                else if (this.isReplaceOrNot(cpoc, rtxt, direction, isarrow, isclear)) {
 
                     // rewrite existing line
                     editor.edit(builder => {
@@ -251,15 +267,29 @@ class BoxdrawExtension {
         }
     }
 
-    // text to replace
-    public getReplaceText(ppoc: PosColumn, cpoc: PosColumn, npoc: PosColumn, isarrow: boolean, isclear: boolean) {
+    /** text to replace */
+    public getReplaceText(ppoc: PosColumn, cpoc: PosColumn, npoc: PosColumn, direction: string, isarrow: boolean, isclear: boolean) {
         // TODO 罫線対応
-        if (isarrow) return "□";
-        if (isclear) return "  ";
-        return "■";
+        if (true) {
+            if (isarrow) return "□";
+            if (isclear) return "  ";
+            return "■";
+        }
     }
 
-    // for vscode
+    /** check replace or not */
+    public isReplaceOrNot(cpoc: PosColumn, rtxt: string, direction: string, isarrow: boolean, isclear: boolean) {
+        // TODO 罫線対応
+        if (true) {
+            if (isarrow) return cpoc.ctxt != rtxt;
+            if (isclear) return cpoc.ctxt == "■" || cpoc.ctxt == "□";
+            return cpoc.ctxt != rtxt;
+        }
+    }
+
+    // vscode
+
+    /** set mode */
     public setMode(mode: boolean, force = false) {
 
         if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setMode(${[...arguments]})`);
@@ -270,6 +300,8 @@ class BoxdrawExtension {
             this.updateStatusbar();
         }
     }
+
+    /** update statusbar */
     public updateStatusbar() {
 
         if (this.debug) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
@@ -281,28 +313,39 @@ class BoxdrawExtension {
     }
 
     // utility
+
+    /** return timestamp string */
     public timestamp(): string {
         return new Date().toLocaleString("ja-JP").split(" ")[1];
     }
 };
 export const boxdrawextension = new BoxdrawExtension();
 
-// position with column
+/** position with column */
 class PosColumn {
 
     // property
+    /** current line number */
     public line: number;
+    /** current column number not character number*/
     public column: number;
-    protected lineendpos: vscode.Position;
-    public ctxt: string;
+    /** text of previous line */
     public ptxt: string;
+    /** text of current position */
+    public ctxt: string;
+    /** text of next line */
     public ntxt: string;
+    /** beginning character number for replace*/
     public rbgnchr: number;
+    /** end character number for replace */
     public rendchr: number;
+    /** before character number for replace */
     public rbgnchr2: number;
+    /** after character number for replace */
     public rendchr2: number;
+    /** code to char mapping array */
     public static boxchars: { char: string, val: number }[] = [
-        { val: 0b00000000, char: "" },
+        { val: 0b00000000, char: "  " },
         { val: 0b00000001, char: "" },
         { val: 0b00000010, char: "" },
         { val: 0b00000011, char: "└" },
@@ -324,18 +367,17 @@ class PosColumn {
         { val: 0b00001010, char: "←" }
     ];
 
-    // constructor
+    /** constructor*/
     constructor(line: number, column: number) {
 
         // init property
         this.line = line;
         this.column = column;
-        this.initInner();
+        this.initProperty();
     }
 
-    // init property
-    protected initInner() {
-        this.lineendpos = null;
+    /** init property */
+    protected initProperty() {
         this.ctxt = "";
         this.ptxt = "";
         this.ntxt = "";
@@ -345,7 +387,7 @@ class PosColumn {
         this.rendchr = 0;
     }
 
-    // get cursor cposition
+    /** get cursor cposition */
     public static getCursor(): PosColumn {
 
         if (boxdrawextension.debug) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getActive(${[...arguments]})`);
@@ -360,7 +402,7 @@ class PosColumn {
         return cpos;
     }
 
-    // location to position
+    /** poscolum to position */
     public toPosition(fulfill = false) {
 
         if (boxdrawextension.debug) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getPosition(${[...arguments]})`);
@@ -369,7 +411,7 @@ class PosColumn {
         const document = editor.document;
 
         // init property
-        this.initInner();
+        this.initProperty();
 
         // validation
         if (this.line < 0) return null;
@@ -377,7 +419,6 @@ class PosColumn {
 
         // get line
         const line = document.lineAt(this.line);
-        this.lineendpos = line.range.end;
 
         // calc character begin
         let chars = line.text.split("");
