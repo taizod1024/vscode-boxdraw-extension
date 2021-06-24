@@ -5,12 +5,12 @@ var eaw = require('eastasianwidth');
 // - vscode
 //      - vscodeの全角文字の実装は不完全、以下のisFullWidthCharacter()を参照のこと
 //          https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts
-//      
 //      - 罫線文字は表示幅は半角2文字分だが、表示桁数は半角1文字で計算されている
 // - boxdraw-extension
 //      - cursorDownが最下行では行末に移動する動きは実装しない
 //      - cursorUpSelect/cursorDownSelectは実装しない
 //      - タブ文字は対象外
+//      - マルチカーソルは対象外
 
 // extension main class
 class BoxdrawExtension {
@@ -134,8 +134,8 @@ class BoxdrawExtension {
 
         // check editor exist
         const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
         const document = editor.document;
+        if (!editor) return;
 
         // check cursor poscolumn
         const cpoc = PosColumn.getCursor(); // current poscolumn
@@ -144,20 +144,22 @@ class BoxdrawExtension {
         ppoc.toPosition();
         cpoc.toPosition();
         npoc.toPosition();
+        let rtxt = this.getReplaceText(ppoc, cpoc, npoc, isarrow, isclear);
 
         if (this.debug) this.channel.appendLine(
             "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "]<" + ppoc.rbgnchr + "><" + ppoc.rbgnchr2 + ">" + ppoc.rendchr2 + "," + ppoc.rendchr + "\n" +
             "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "]<" + cpoc.rbgnchr + "><" + cpoc.rbgnchr2 + ">" + cpoc.rendchr2 + "," + cpoc.rendchr + "\n" +
             "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr + "><" + npoc.rbgnchr2 + ">" + npoc.rendchr2 + "," + npoc.rendchr);
 
-        // draw current position
-        if (cpoc.ctxt != "■") {
+        // check current position
+        if (cpoc.ctxt != rtxt) {
 
+            // draw current position
             editor.edit(builder => {
                 const rbpos = new vscode.Position(cpoc.line, cpoc.rbgnchr); // replace begin position
                 const repos = new vscode.Position(cpoc.line, cpoc.rendchr); // replace end position
                 const range = new vscode.Range(rbpos, repos);
-                builder.replace(range, " ".repeat(cpoc.rbgnchr2) + "■" + " ".repeat(cpoc.rendchr2));
+                builder.replace(range, " ".repeat(cpoc.rbgnchr2) + rtxt + " ".repeat(cpoc.rendchr2));
             }).then(() => {
                 const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2); // current position
                 editor.selection = new vscode.Selection(cpos, cpos);
@@ -208,24 +210,23 @@ class BoxdrawExtension {
                     "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr2 + "><" + npoc.rendchr2 + ">" + npoc.rbgnchr + "," + npoc.rendchr);
 
                 // draw next position and move active
-                // TODO ここの制御をスマートに
                 if (cpoc.line == document.lineCount) {
                     // add new line
                     editor.edit(builder => {
                         const line = document.lineAt(document.lineCount - 1);
-                        builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + "■");
+                        builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + rtxt);
                     }).then(() => {
                         const cpos = new vscode.Position(cpoc.line, cpoc.column);
                         editor.selection = new vscode.Selection(cpos, cpos);
                         vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                     });
-                } else if (cpoc.ctxt != "■") {
+                } else if (cpoc.ctxt != rtxt) {
                     // rewrite existing line
                     editor.edit(builder => {
                         const posbgn = new vscode.Position(cpoc.line, cpoc.rbgnchr);
                         const posend = new vscode.Position(cpoc.line, cpoc.rendchr);
                         const range = new vscode.Range(posbgn, posend);
-                        builder.replace(range, " ".repeat(cpoc.rbgnchr2) + "■" + " ".repeat(cpoc.rendchr2));
+                        builder.replace(range, " ".repeat(cpoc.rbgnchr2) + rtxt + " ".repeat(cpoc.rendchr2));
                     }).then(() => {
                         const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
                         editor.selection = new vscode.Selection(cpos, cpos);
@@ -239,6 +240,14 @@ class BoxdrawExtension {
                 }
             }
         }
+    }
+
+    // text to replace
+    public getReplaceText(ppoc: PosColumn, cpoc: PosColumn, npoc: PosColumn, isarrow: boolean, isclear: boolean) {
+        // TODO 罫線対応
+        if (isarrow) return "□";
+        if (isclear) return "  ";
+        return "■";
     }
 
     // for vscode
@@ -414,7 +423,7 @@ class PosColumn {
             this.rbgnchr2 += (column < this.column) ? this.column - column : 0;
         }
 
-        
+
         // return position
         let actchr = this.rbgnchr + this.rbgnchr2;
         let pos = new vscode.Position(this.line, actchr);
