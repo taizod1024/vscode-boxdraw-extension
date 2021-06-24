@@ -154,6 +154,7 @@ class BoxdrawExtension {
         // check editor
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
+        const document = editor.document;
 
         // check active position
         const cpos = CPosition.getActive();
@@ -216,32 +217,41 @@ class BoxdrawExtension {
             if (moving) {
 
                 // check next position
-                cpos.gotoPosition(true).then(() => {
+                ppos.getPosition();
+                cpos.getPosition(true);
+                npos.getPosition();
 
-                    ppos.getPosition();
-                    cpos.getPosition();
-                    npos.getPosition();
+                this.channel.appendLine(
+                    "- <" + ppos.ptxt + "><" + ppos.ctxt + "><" + ppos.ntxt + ">[" + ppos.rbgntxt + "][" + ppos.rendtxt + "]" + ppos.rbgnchr + "," + ppos.rendchr + "\n" +
+                    "- <" + cpos.ptxt + "><" + cpos.ctxt + "><" + cpos.ntxt + ">[" + cpos.rbgntxt + "][" + cpos.rendtxt + "]" + cpos.rbgnchr + "," + cpos.rendchr + "\n" +
+                    "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr);
 
-                    this.channel.appendLine(
-                        "- <" + ppos.ptxt + "><" + ppos.ctxt + "><" + ppos.ntxt + ">[" + ppos.rbgntxt + "][" + ppos.rendtxt + "]" + ppos.rbgnchr + "," + ppos.rendchr + "\n" +
-                        "- <" + cpos.ptxt + "><" + cpos.ctxt + "><" + cpos.ntxt + ">[" + cpos.rbgntxt + "][" + cpos.rendtxt + "]" + cpos.rbgnchr + "," + cpos.rendchr + "\n" +
-                        "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr);
-
-
-                    // draw next position and move active
+                // draw next position and move active
+                // TODO ここの制御をスマートに
+                if (cpos.line == document.lineCount) {
                     editor.edit(builder => {
+                        // 最終行は行追加とカラム制御を一緒に行う
                         this.channel.appendLine(`#edit2`);
-                        if (cpos.ctxt != "■") {
-                            const posbgn = new vscode.Position(cpos.line, cpos.rbgnchr);
-                            const posend = new vscode.Position(cpos.line, cpos.rendchr);
-                            const range = new vscode.Range(posbgn, posend);
-                            builder.replace(range, cpos.rbgntxt + "■" + cpos.rendtxt);
-                        }
+                        const line = document.lineAt(document.lineCount - 1);
+                        builder.insert(line.range.end, "\n" + " ".repeat(cpos.column) + "■");
+                    }).then(() => {
+                        const posact = new vscode.Position(cpos.line, cpos.column);
+                        editor.selection = new vscode.Selection(posact, posact);
+                    });
+                } else if (cpos.ctxt != "■") {
+                    editor.edit(builder => {
+                        const posbgn = new vscode.Position(cpos.line, cpos.rbgnchr);
+                        const posend = new vscode.Position(cpos.line, cpos.rendchr);
+                        const range = new vscode.Range(posbgn, posend);
+                        builder.replace(range, cpos.rbgntxt + "■" + cpos.rendtxt);
                     }).then(() => {
                         const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
                         editor.selection = new vscode.Selection(posact, posact);
                     });
-                });
+                } else {
+                    const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
+                    editor.selection = new vscode.Selection(posact, posact);
+                }
             }
         }
     }
@@ -280,7 +290,6 @@ class CPosition {
     public line: number;
     public column: number;
     protected lineendpos: vscode.Position;
-    protected fulfillblank: number;
     public ctxt: string;
     public ptxt: string;
     public ntxt: string;
@@ -321,7 +330,6 @@ class CPosition {
     // init property
     protected initInner() {
         this.lineendpos = null;
-        this.fulfillblank = 0;
         this.ctxt = "";
         this.ptxt = "";
         this.ntxt = "";
@@ -414,73 +422,58 @@ class CPosition {
         }
 
         // fulfill
+        let blank = 0;
         if (fulfill) {
-            this.fulfillblank = (column < this.column) ? this.column - column : 0;
-            this.rbgntxt += " ".repeat(this.fulfillblank);
+            blank = (column < this.column) ? this.column - column : 0;
+            this.rbgntxt += " ".repeat(blank);
         }
 
         // 
-        let actchr = this.rbgnchr + this.fulfillblank;
+        let actchr = this.rbgnchr + blank;
         // if (character >= chars.length) actchr = chars.length;
         let pos = new vscode.Position(this.line, actchr);
         return pos;
     }
 
     // goto
-    public gotoPosition(fulfill = false) {
+    public gotoPosition() {
 
         boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] gotoPosition(${[...arguments]})`);
 
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
-        let pos = this.getPosition(fulfill);
-        if (fulfill) {
-            // return after insertion
-            return editor.edit(builder => {
-                boxdrawextension.channel.appendLine(`#edit1`);
-                builder.insert(this.lineendpos, " ".repeat(this.fulfillblank));
-                editor.selection = new vscode.Selection(pos, pos);
-            });
-        } else {
-            // return immediately
-            editor.selection = new vscode.Selection(pos, pos);
-            return null;
-        }
+        let pos = this.getPosition();
+        if (pos) editor.selection = new vscode.Selection(pos, pos);
     }
 
     // backward line
-    public backwardLine(fulfill = false) {
+    public backwardLine() {
 
         boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] backwardLine(${[...arguments]})`);
 
         const editor = vscode.window.activeTextEditor;
         return editor.edit(() => {
-            boxdrawextension.channel.appendLine(`#edit1`);
+            boxdrawextension.channel.appendLine(`#edit4`);
             if (this.line > 0) {
                 this.line--;
-                this.gotoPosition(fulfill);
+                this.gotoPosition();
+                // TODO 画面スクロール
             }
         });
     }
 
     // forward line
-    public forwardLine(fulfill = false) {
+    public forwardLine() {
 
         boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] forwardLine(${[...arguments]})`);
 
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
-        return editor.edit(builder => {
-            boxdrawextension.channel.appendLine(`#edit1`);
+        editor.edit(() => {
+            boxdrawextension.channel.appendLine(`#edit5`);
             this.line++;
-            if (this.line < document.lineCount) {
-                this.gotoPosition(fulfill);
-            } else if (fulfill) {
-                const line = document.lineAt(document.lineCount - 1);
-                builder.insert(line.range.end, "\n" + " ".repeat(this.column));
-                const pos = new vscode.Position(this.line, this.column);
-                editor.selection = new vscode.Selection(pos, pos);
-            }
+            this.gotoPosition();
+            // TODO 画面スクロール
         });
     }
 }
