@@ -22,6 +22,7 @@ class BoxdrawExtension {
 
     // context
     public mode: boolean;
+    public debug: boolean;
 
     // vscode
     public channel: vscode.OutputChannel;
@@ -46,6 +47,7 @@ class BoxdrawExtension {
 
         // init context
         this.mode = false;
+        this.debug = false;
 
         // init vscode
 
@@ -53,18 +55,18 @@ class BoxdrawExtension {
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleMode`, () => { boxdrawextension.toggleMode(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorUp`, () => { boxdrawextension.cursorUp(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorDown`, () => { boxdrawextension.cursorDown(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeft`, () => { boxdrawextension.drawLeft(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRight`, () => { boxdrawextension.drawRight(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUp`, () => { boxdrawextension.drawUp(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDown`, () => { boxdrawextension.drawDown(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeftArrow`, () => { boxdrawextension.drawLeftArrow(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRightArrow`, () => { boxdrawextension.drawRightArrow(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUpArrow`, () => { boxdrawextension.drawUpArrow(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDownArrow`, () => { boxdrawextension.drawDownArrow(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearLeft`, () => { boxdrawextension.clearLeft(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearRight`, () => { boxdrawextension.clearRight(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearUp`, () => { boxdrawextension.clearUp(); }));
-        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearDown`, () => { boxdrawextension.clearDown(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeft`, () => { boxdrawextension.drawBox("left"); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRight`, () => { boxdrawextension.drawBox("right"); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUp`, () => { boxdrawextension.drawBox("up",); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDown`, () => { boxdrawextension.drawBox("down"); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeftArrow`, () => { boxdrawextension.drawBox("left", true); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawRightArrow`, () => { boxdrawextension.drawBox("right", true); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawUpArrow`, () => { boxdrawextension.drawBox("up", true); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawDownArrow`, () => { boxdrawextension.drawBox("down", true); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearLeft`, () => { boxdrawextension.drawBox("left", false, true); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearRight`, () => { boxdrawextension.drawBox("right", false, true); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearUp`, () => { boxdrawextension.drawBox("up", false, true); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.clearDown`, () => { boxdrawextension.drawBox("down", false, true); }));
 
         // - statusbar
         this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -80,186 +82,169 @@ class BoxdrawExtension {
 
     // - mode management
     public toggleMode() {
-        this.channel.appendLine(`--------`);
+
+        if (this.debug) this.channel.appendLine(`--------`);
+
         this.setMode(!this.mode);
     }
 
     // - move cursor
     public cursorUp() {
-        this.channel.appendLine(`--------`);
-        let cpos = CPosition.getActive();
-        cpos.backwardLine()
+
+        if (this.debug) this.channel.appendLine(`--------`);
+
+        const editor = vscode.window.activeTextEditor;
+        const document = editor.document;
+
+        let cpoc = PosColumn.getCursor();
+        editor.edit(() => {
+            if (cpoc.line > 0) {
+                cpoc.line--;
+                let cpos = cpoc.toPosition();
+                if (cpos) {
+                    editor.selection = new vscode.Selection(cpos, cpos);
+                    vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
+                }
+            }
+        });
     }
     public cursorDown() {
-        this.channel.appendLine(`--------`);
-        let cpos = CPosition.getActive();
-        cpos.forwardLine();
+
+        if (this.debug) this.channel.appendLine(`--------`);
+
+        const editor = vscode.window.activeTextEditor;
+        const document = editor.document;
+
+        let cpoc = PosColumn.getCursor();
+        editor.edit(() => {
+            cpoc.line++;
+            let cpos = cpoc.toPosition();
+            if (cpos) {
+                editor.selection = new vscode.Selection(cpos, cpos);
+                vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
+            }
+        });
     }
 
-    // - draw line
-    public drawLeft() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("left", false, false);
-    }
-    public drawRight() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("right", false, false);
-    }
-    public drawUp() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("up", false, false);
-    }
-    public drawDown() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("down", false, false);
-    }
+    // - draw line, draw arrow, clear line
+    protected drawBox(direction: "left" | "right" | "up" | "down", isarrow = false, isclear = false) {
 
-    // - draw arrow
-    public drawLeftArrow() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("left", true, false);
-    }
-    public drawRightArrow() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("right", true, false);
-    }
-    public drawUpArrow() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("up", true, false);
-    }
-    public drawDownArrow() {
-        this.channel.appendLine(`--------`);
-        this.drawBox("down", true, false);
-    }
+        if (this.debug) this.channel.appendLine(`--------`);
+        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] drawBox(${[...arguments]})`);
 
-    // clear line
-    public clearLeft() {
-        this.drawBox("left", false, true);
-    }
-    public clearRight() {
-        this.drawBox("right", false, true);
-    }
-    public clearUp() {
-        this.drawBox("up", false, true);
-    }
-    public clearDown() {
-        this.drawBox("down", false, true);
-    }
-
-    // inner interface
-    protected drawBox(direction: string, isarrow: boolean, isclear: boolean) {
-
-        this.channel.appendLine(`[${this.timestamp()}] drawBox(${[...arguments]})`);
-
-        // check editor
+        // check editor exist
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
         const document = editor.document;
 
-        // check active position
-        const cpos = CPosition.getActive();
-        const ppos = new CPosition(cpos.line - 1, cpos.column);
-        const npos = new CPosition(cpos.line + 1, cpos.column);
-        ppos.getPosition();
-        cpos.getPosition();
-        npos.getPosition();
+        // check cursor poscolumn
+        const cpoc = PosColumn.getCursor(); // current poscolumn
+        const ppoc = new PosColumn(cpoc.line - 1, cpoc.column); // prev poscolumn
+        const npoc = new PosColumn(cpoc.line + 1, cpoc.column); // next poscolumn
+        ppoc.toPosition();
+        cpoc.toPosition();
+        npoc.toPosition();
 
-        this.channel.appendLine(
-            "- <" + ppos.ptxt + "><" + ppos.ctxt + "><" + ppos.ntxt + ">[" + ppos.rbgntxt + "][" + ppos.rendtxt + "]" + ppos.rbgnchr + "," + ppos.rendchr + "\n" +
-            "- <" + cpos.ptxt + "><" + cpos.ctxt + "><" + cpos.ntxt + ">[" + cpos.rbgntxt + "][" + cpos.rendtxt + "]" + cpos.rbgnchr + "," + cpos.rendchr + "\n" +
-            "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr);
+        if (this.debug) this.channel.appendLine(
+            "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "]<" + ppoc.rbgnchr + "><" + ppoc.rbgnchr2 + ">" + ppoc.rendchr2 + "," + ppoc.rendchr + "\n" +
+            "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "]<" + cpoc.rbgnchr + "><" + cpoc.rbgnchr2 + ">" + cpoc.rendchr2 + "," + cpoc.rendchr + "\n" +
+            "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr + "><" + npoc.rbgnchr2 + ">" + npoc.rendchr2 + "," + npoc.rendchr);
 
         // draw current position
-        if (cpos.ctxt != "■") {
+        if (cpoc.ctxt != "■") {
 
             editor.edit(builder => {
-                this.channel.appendLine(`#edit1`);
-                const posbgn = new vscode.Position(cpos.line, cpos.rbgnchr);
-                const posend = new vscode.Position(cpos.line, cpos.rendchr);
-                const range = new vscode.Range(posbgn, posend);
-                builder.replace(range, cpos.rbgntxt + "■" + cpos.rendtxt);
+                const rbpos = new vscode.Position(cpoc.line, cpoc.rbgnchr); // replace begin position
+                const repos = new vscode.Position(cpoc.line, cpoc.rendchr); // replace end position
+                const range = new vscode.Range(rbpos, repos);
+                builder.replace(range, " ".repeat(cpoc.rbgnchr2) + "■" + " ".repeat(cpoc.rendchr2));
             }).then(() => {
-                const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
-                editor.selection = new vscode.Selection(posact, posact);
+                const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2); // current position
+                editor.selection = new vscode.Selection(cpos, cpos);
+                vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
             });
 
         } else {
 
-            // goto next position
-            let moving = false;
+            // check move ...
+            let ismoved = false;
             if (direction == "up") {
-                if (cpos.line >= 1) {
-                    moving = true;
-                    cpos.line--;
-                    ppos.line--;
-                    npos.line--;
+                if (cpoc.line >= 1) {
+                    ismoved = true;
+                    cpoc.line--;
+                    ppoc.line--;
+                    npoc.line--;
                 }
             } else if (direction == "left") {
-                if (cpos.column >= 2) {
-                    moving = true;
-                    cpos.column -= 2;
-                    ppos.column -= 2;
-                    npos.column -= 2;
+                if (cpoc.column >= 2) {
+                    ismoved = true;
+                    cpoc.column -= 2;
+                    ppoc.column -= 2;
+                    npoc.column -= 2;
                 }
             } else if (direction == "down") {
-                moving = true;
-                cpos.line++;
-                ppos.line++;
-                npos.line++;
+                ismoved = true;
+                cpoc.line++;
+                ppoc.line++;
+                npoc.line++;
             } else if (direction == "right") {
-                moving = true;
-                cpos.column += 2;
-                ppos.column += 2;
-                npos.column += 2;
+                ismoved = true;
+                cpoc.column += 2;
+                ppoc.column += 2;
+                npoc.column += 2;
             }
 
-            // if moving ...
-            if (moving) {
+            // if moved ...
+            if (ismoved) {
 
                 // check next position
-                ppos.getPosition();
-                cpos.getPosition(true);
-                npos.getPosition();
+                ppoc.toPosition();
+                cpoc.toPosition(true);
+                npoc.toPosition();
 
-                this.channel.appendLine(
-                    "- <" + ppos.ptxt + "><" + ppos.ctxt + "><" + ppos.ntxt + ">[" + ppos.rbgntxt + "][" + ppos.rendtxt + "]" + ppos.rbgnchr + "," + ppos.rendchr + "\n" +
-                    "- <" + cpos.ptxt + "><" + cpos.ctxt + "><" + cpos.ntxt + ">[" + cpos.rbgntxt + "][" + cpos.rendtxt + "]" + cpos.rbgnchr + "," + cpos.rendchr + "\n" +
-                    "- <" + npos.ptxt + "><" + npos.ctxt + "><" + npos.ntxt + ">[" + npos.rbgntxt + "][" + npos.rendtxt + "]" + npos.rbgnchr + "," + npos.rendchr);
+                if (this.debug) this.channel.appendLine(
+                    "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "]<" + ppoc.rbgnchr2 + "><" + ppoc.rendchr2 + ">" + ppoc.rbgnchr + "," + ppoc.rendchr + "\n" +
+                    "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "]<" + cpoc.rbgnchr2 + "><" + cpoc.rendchr2 + ">" + cpoc.rbgnchr + "," + cpoc.rendchr + "\n" +
+                    "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr2 + "><" + npoc.rendchr2 + ">" + npoc.rbgnchr + "," + npoc.rendchr);
 
                 // draw next position and move active
                 // TODO ここの制御をスマートに
-                if (cpos.line == document.lineCount) {
+                if (cpoc.line == document.lineCount) {
+                    // add new line
                     editor.edit(builder => {
-                        // 最終行は行追加とカラム制御を一緒に行う
-                        this.channel.appendLine(`#edit2`);
                         const line = document.lineAt(document.lineCount - 1);
-                        builder.insert(line.range.end, "\n" + " ".repeat(cpos.column) + "■");
+                        builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + "■");
                     }).then(() => {
-                        const posact = new vscode.Position(cpos.line, cpos.column);
-                        editor.selection = new vscode.Selection(posact, posact);
+                        const cpos = new vscode.Position(cpoc.line, cpoc.column);
+                        editor.selection = new vscode.Selection(cpos, cpos);
+                        vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                     });
-                } else if (cpos.ctxt != "■") {
+                } else if (cpoc.ctxt != "■") {
+                    // rewrite existing line
                     editor.edit(builder => {
-                        const posbgn = new vscode.Position(cpos.line, cpos.rbgnchr);
-                        const posend = new vscode.Position(cpos.line, cpos.rendchr);
+                        const posbgn = new vscode.Position(cpoc.line, cpoc.rbgnchr);
+                        const posend = new vscode.Position(cpoc.line, cpoc.rendchr);
                         const range = new vscode.Range(posbgn, posend);
-                        builder.replace(range, cpos.rbgntxt + "■" + cpos.rendtxt);
+                        builder.replace(range, " ".repeat(cpoc.rbgnchr2) + "■" + " ".repeat(cpoc.rendchr2));
                     }).then(() => {
-                        const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
-                        editor.selection = new vscode.Selection(posact, posact);
+                        const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
+                        editor.selection = new vscode.Selection(cpos, cpos);
+                        vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                     });
                 } else {
-                    const posact = new vscode.Position(cpos.line, cpos.rbgnchr + cpos.rbgntxt.length);
-                    editor.selection = new vscode.Selection(posact, posact);
+                    // nothing to draw
+                    const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
+                    editor.selection = new vscode.Selection(cpos, cpos);
+                    vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                 }
             }
         }
     }
 
-    // vscode
+    // for vscode
     public setMode(mode: boolean, force = false) {
 
-        this.channel.appendLine(`[${this.timestamp()}] setMode(${[...arguments]})`);
+        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setMode(${[...arguments]})`);
 
         if (this.mode != mode || force) {
             this.mode = mode;
@@ -269,7 +254,7 @@ class BoxdrawExtension {
     }
     public updateStatusbar() {
 
-        this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
+        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
 
         let msg = "";
         msg += this.mode ? "$(edit)" : ""
@@ -284,7 +269,8 @@ class BoxdrawExtension {
 };
 export const boxdrawextension = new BoxdrawExtension();
 
-class CPosition {
+// position with column
+class PosColumn {
 
     // property
     public line: number;
@@ -295,8 +281,8 @@ class CPosition {
     public ntxt: string;
     public rbgnchr: number;
     public rendchr: number;
-    public rbgntxt: string;
-    public rendtxt: string;
+    public rbgnchr2: number;
+    public rendchr2: number;
     public static boxchars: { char: string, val: number }[] = [
         { val: 0b00000000, char: "" },
         { val: 0b00000001, char: "" },
@@ -322,6 +308,8 @@ class CPosition {
 
     // constructor
     constructor(line: number, column: number) {
+
+        // init property
         this.line = line;
         this.column = column;
         this.initInner();
@@ -334,15 +322,15 @@ class CPosition {
         this.ptxt = "";
         this.ntxt = "";
         this.rbgnchr = 0;
+        this.rbgnchr2 = 0;
+        this.rendchr2 = 0;
         this.rendchr = 0;
-        this.rbgntxt = "";
-        this.rendtxt = "";
     }
 
     // get cursor cposition
-    public static getActive(): CPosition {
+    public static getCursor(): PosColumn {
 
-        boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getActive(${[...arguments]})`);
+        if (boxdrawextension.debug) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getActive(${[...arguments]})`);
 
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
@@ -350,14 +338,14 @@ class CPosition {
         let bol = new vscode.Position(current.line, 0);
         let range = new vscode.Range(bol, current);
         let text = document.getText(range);
-        let cpos = new CPosition(current.line, eaw.length(text));
+        let cpos = new PosColumn(current.line, eaw.length(text));
         return cpos;
     }
 
     // location to position
-    public getPosition(fulfill = false) {
+    public toPosition(fulfill = false) {
 
-        boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getPosition(${[...arguments]})`);
+        if (boxdrawextension.debug) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getPosition(${[...arguments]})`);
 
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
@@ -387,7 +375,7 @@ class CPosition {
             if (column > this.column) {
                 this.rbgnchr = character - 1;
                 this.rendchr = character - 1;
-                this.rbgntxt = " ";
+                this.rbgnchr2 = 1;
                 break;
             }
             if (character >= chars.length) {
@@ -409,71 +397,27 @@ class CPosition {
             }
             if (column > this.column + 2) {
                 this.rendchr = character;
-                this.rendtxt = " ";
+                this.rendchr2 = 1;
                 break;
             }
             if (character >= chars.length) {
                 this.rendchr = character;
                 break;
             }
-            if (this.rbgntxt == "") this.ctxt += chars[character];
+            if (this.rbgnchr2 == 0) this.ctxt += chars[character];
             column += eaw.characterLength(chars[character]);
             character++
         }
 
         // fulfill
-        let blank = 0;
         if (fulfill) {
-            blank = (column < this.column) ? this.column - column : 0;
-            this.rbgntxt += " ".repeat(blank);
+            this.rbgnchr2 += (column < this.column) ? this.column - column : 0;
         }
 
-        // 
-        let actchr = this.rbgnchr + blank;
-        // if (character >= chars.length) actchr = chars.length;
+        
+        // return position
+        let actchr = this.rbgnchr + this.rbgnchr2;
         let pos = new vscode.Position(this.line, actchr);
         return pos;
-    }
-
-    // goto
-    public gotoPosition() {
-
-        boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] gotoPosition(${[...arguments]})`);
-
-        const editor = vscode.window.activeTextEditor;
-        const document = editor.document;
-        let pos = this.getPosition();
-        if (pos) editor.selection = new vscode.Selection(pos, pos);
-    }
-
-    // backward line
-    public backwardLine() {
-
-        boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] backwardLine(${[...arguments]})`);
-
-        const editor = vscode.window.activeTextEditor;
-        return editor.edit(() => {
-            boxdrawextension.channel.appendLine(`#edit4`);
-            if (this.line > 0) {
-                this.line--;
-                this.gotoPosition();
-                // TODO 画面スクロール
-            }
-        });
-    }
-
-    // forward line
-    public forwardLine() {
-
-        boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] forwardLine(${[...arguments]})`);
-
-        const editor = vscode.window.activeTextEditor;
-        const document = editor.document;
-        editor.edit(() => {
-            boxdrawextension.channel.appendLine(`#edit5`);
-            this.line++;
-            this.gotoPosition();
-            // TODO 画面スクロール
-        });
     }
 }
