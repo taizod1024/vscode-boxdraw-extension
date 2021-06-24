@@ -209,8 +209,9 @@ class BoxdrawExtension {
                     "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "]<" + cpoc.rbgnchr2 + "><" + cpoc.rendchr2 + ">" + cpoc.rbgnchr + "," + cpoc.rendchr + "\n" +
                     "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr2 + "><" + npoc.rendchr2 + ">" + npoc.rbgnchr + "," + npoc.rendchr);
 
-                // draw next position and move active
+                // check last line or not
                 if (cpoc.line == document.lineCount) {
+
                     // add new line
                     editor.edit(builder => {
                         const line = document.lineAt(document.lineCount - 1);
@@ -220,7 +221,11 @@ class BoxdrawExtension {
                         editor.selection = new vscode.Selection(cpos, cpos);
                         vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                     });
-                } else if (cpoc.ctxt != rtxt) {
+
+                }
+                // check next position
+                else if (cpoc.ctxt != rtxt) {
+
                     // rewrite existing line
                     editor.edit(builder => {
                         const posbgn = new vscode.Position(cpoc.line, cpoc.rbgnchr);
@@ -232,8 +237,12 @@ class BoxdrawExtension {
                         editor.selection = new vscode.Selection(cpos, cpos);
                         vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                     });
-                } else {
-                    // nothing to draw
+
+                }
+                // nothing to draw 
+                else {
+
+                    // move to next position
                     const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
                     editor.selection = new vscode.Selection(cpos, cpos);
                     vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
