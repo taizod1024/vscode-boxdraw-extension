@@ -2,7 +2,7 @@
 
 ![Status-WIP](https://img.shields.io/badge/Status-WIP-orange)
 
-vscodeで罫線文字で図を描くための拡張機能です。
+罫線文字で図を描くための拡張機能です。
 
 ![boxdrawk](https://github.com/taizod1024/vscode-boxdraw-extension/blob/main/images/boxdraw.gif?raw=true)
 
