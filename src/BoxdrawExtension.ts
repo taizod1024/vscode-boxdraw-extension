@@ -56,7 +56,7 @@ class BoxdrawExtension {
         // init context
         this.channel = vscode.window.createOutputChannel(this.appname);
         this.channel.show(true);
-        this.channel.appendLine(`[${this.timestamp()}] ${this.appname}`);
+        this.channel.appendLine(`[${this.timestamp()}] ${this.appname} activated`);
 
         // init context
         this.mode = false;
@@ -153,8 +153,7 @@ class BoxdrawExtension {
         if (!editor) return;
 
         // check cursor poscolumn
-        /** current poscolumn */
-        const cpoc = PosColumn.getCursor();
+        const cpoc = PosColumn.getCursor(); // current poscolumn
         const ppoc = new PosColumn(cpoc.line - 1, cpoc.column); // prev poscolumn
         const npoc = new PosColumn(cpoc.line + 1, cpoc.column); // next poscolumn
         ppoc.toPosition();
@@ -163,9 +162,9 @@ class BoxdrawExtension {
         let rtxt = this.getReplaceText(ppoc, cpoc, npoc, direction, isarrow, isclear);
 
         if (this.debug) this.channel.appendLine(
-            "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "]<" + ppoc.rbgnchr + "><" + ppoc.rbgnchr2 + ">" + ppoc.rendchr2 + "," + ppoc.rendchr + "\n" +
-            "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "]<" + cpoc.rbgnchr + "><" + cpoc.rbgnchr2 + ">" + cpoc.rendchr2 + "," + cpoc.rendchr + "\n" +
-            "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr + "><" + npoc.rbgnchr2 + ">" + npoc.rendchr2 + "," + npoc.rendchr);
+            "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "] " + ppoc.rbgnchr + ", " + ppoc.rbgnchr2 + ", " + ppoc.rendchr2 + ", " + ppoc.rendchr + "\n" +
+            "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "] " + cpoc.rbgnchr + ", " + cpoc.rbgnchr2 + ", " + cpoc.rendchr2 + ", " + cpoc.rendchr + "\n" +
+            "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "] " + npoc.rbgnchr + ", " + npoc.rbgnchr2 + ", " + npoc.rendchr2 + ", " + npoc.rendchr);
 
         // check current position
         if (this.isReplaceOrNot(cpoc, rtxt, direction, isarrow, isclear)) {
@@ -181,94 +180,95 @@ class BoxdrawExtension {
                 editor.selection = new vscode.Selection(cpos, cpos);
                 vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
             });
+            return;
 
-        } else {
-
-            // check move ...
-            let ismoved = false;
-            if (direction == "up") {
-                if (cpoc.line >= 1) {
-                    ismoved = true;
-                    cpoc.line--;
-                    ppoc.line--;
-                    npoc.line--;
-                }
-            } else if (direction == "left") {
-                if (cpoc.column >= 2) {
-                    ismoved = true;
-                    cpoc.column -= 2;
-                    ppoc.column -= 2;
-                    npoc.column -= 2;
-                }
-            } else if (direction == "down") {
-                ismoved = true;
-                cpoc.line++;
-                ppoc.line++;
-                npoc.line++;
-            } else if (direction == "right") {
-                ismoved = true;
-                cpoc.column += 2;
-                ppoc.column += 2;
-                npoc.column += 2;
-            }
-
-            // if moved ...
-            if (ismoved) {
-
-                // check next position
-                ppoc.toPosition();
-                cpoc.toPosition(true);
-                npoc.toPosition();
-
-                if (this.debug) this.channel.appendLine(
-                    "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "]<" + ppoc.rbgnchr2 + "><" + ppoc.rendchr2 + ">" + ppoc.rbgnchr + "," + ppoc.rendchr + "\n" +
-                    "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "]<" + cpoc.rbgnchr2 + "><" + cpoc.rendchr2 + ">" + cpoc.rbgnchr + "," + cpoc.rendchr + "\n" +
-                    "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "]<" + npoc.rbgnchr2 + "><" + npoc.rendchr2 + ">" + npoc.rbgnchr + "," + npoc.rendchr);
-
-                // check last line or not
-                if (cpoc.line == document.lineCount) {
-
-                    // add new line
-                    editor.edit(builder => {
-                        const line = document.lineAt(document.lineCount - 1);
-                        builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + rtxt);
-                    }).then(() => {
-                        const cpos = new vscode.Position(cpoc.line, cpoc.column);
-                        editor.selection = new vscode.Selection(cpos, cpos);
-                        vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
-                    });
-
-                }
-                // check next position
-                else if (this.isReplaceOrNot(cpoc, rtxt, direction, isarrow, isclear)) {
-
-                    // rewrite existing line
-                    editor.edit(builder => {
-                        const posbgn = new vscode.Position(cpoc.line, cpoc.rbgnchr);
-                        const posend = new vscode.Position(cpoc.line, cpoc.rendchr);
-                        const range = new vscode.Range(posbgn, posend);
-                        builder.replace(range, " ".repeat(cpoc.rbgnchr2) + rtxt + " ".repeat(cpoc.rendchr2));
-                    }).then(() => {
-                        const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
-                        editor.selection = new vscode.Selection(cpos, cpos);
-                        vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
-                    });
-
-                }
-                // nothing to draw 
-                else {
-
-                    // move to next position
-                    const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
-                    editor.selection = new vscode.Selection(cpos, cpos);
-                    vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
-                }
-            }
         }
+
+        // check move or not
+        let ismoved = false;
+        if (direction == "up") {
+            if (cpoc.line >= 1) {
+                ismoved = true;
+                cpoc.line--;
+                ppoc.line--;
+                npoc.line--;
+            }
+        } else if (direction == "left") {
+            if (cpoc.column >= 2) {
+                ismoved = true;
+                cpoc.column -= 2;
+                ppoc.column -= 2;
+                npoc.column -= 2;
+            }
+        } else if (direction == "down") {
+            ismoved = true;
+            cpoc.line++;
+            ppoc.line++;
+            npoc.line++;
+        } else if (direction == "right") {
+            ismoved = true;
+            cpoc.column += 2;
+            ppoc.column += 2;
+            npoc.column += 2;
+        }
+
+        // exit if not moved
+        if (!ismoved) return;
+
+        // check next position
+        ppoc.toPosition();
+        cpoc.toPosition(true);
+        npoc.toPosition();
+
+        if (this.debug) this.channel.appendLine(
+            "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "] " + ppoc.rbgnchr + ", " + ppoc.rbgnchr2 + ", " + ppoc.rendchr2 + ", " + ppoc.rendchr + "\n" +
+            "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "] " + cpoc.rbgnchr + ", " + cpoc.rbgnchr2 + ", " + cpoc.rendchr2 + ", " + cpoc.rendchr + "\n" +
+            "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "] " + npoc.rbgnchr + ", " + npoc.rbgnchr2 + ", " + npoc.rendchr2 + ", " + npoc.rendchr);
+
+        // check last line or not
+        if (cpoc.line == document.lineCount) {
+
+            // add new line
+            editor.edit(builder => {
+                const line = document.lineAt(document.lineCount - 1);
+                builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + rtxt);
+            }).then(() => {
+                const cpos = new vscode.Position(cpoc.line, cpoc.column);
+                editor.selection = new vscode.Selection(cpos, cpos);
+                vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
+            });
+            return;
+        }
+
+        // check next position
+        if (this.isReplaceOrNot(cpoc, rtxt, direction, isarrow, isclear)) {
+
+            // rewrite existing line
+            editor.edit(builder => {
+                const posbgn = new vscode.Position(cpoc.line, cpoc.rbgnchr);
+                const posend = new vscode.Position(cpoc.line, cpoc.rendchr);
+                const range = new vscode.Range(posbgn, posend);
+                builder.replace(range, " ".repeat(cpoc.rbgnchr2) + rtxt + " ".repeat(cpoc.rendchr2));
+            }).then(() => {
+                const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
+                editor.selection = new vscode.Selection(cpos, cpos);
+                vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
+            });
+            return;
+        }
+
+        // nothing to draw 
+        const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
+        editor.selection = new vscode.Selection(cpos, cpos);
+        vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
     }
 
     /** text to replace */
     public getReplaceText(ppoc: PosColumn, cpoc: PosColumn, npoc: PosColumn, direction: string, isarrow: boolean, isclear: boolean) {
+        ppoc;
+        cpoc;
+        npoc;
+        direction;
         // TODO 罫線対応
         if (true) {
             if (isarrow) return "□";
@@ -279,6 +279,7 @@ class BoxdrawExtension {
 
     /** check replace or not */
     public isReplaceOrNot(cpoc: PosColumn, rtxt: string, direction: string, isarrow: boolean, isclear: boolean) {
+        direction;
         // TODO 罫線対応
         if (true) {
             if (isarrow) return cpoc.ctxt != rtxt;
