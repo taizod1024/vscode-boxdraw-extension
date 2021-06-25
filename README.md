@@ -45,4 +45,4 @@ vscodeで罫線文字で図を描くための拡張機能です。
 
 ## 謝辞
 
-- boxdraw-extension の基本的なアイデア xyzzy の boxdraw.l を参考にしています。
+- boxdraw-extension の基本的なアイデアは xyzzy の boxdraw.l を参考にしています。
