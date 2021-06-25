@@ -29,6 +29,8 @@ class BoxdrawExtension {
 
     /** flag for boxdaw */
     public mode: boolean;
+    /** flag for square */
+    public square: boolean;
     /** flag for debug  */
     public debug: boolean;
 
@@ -38,6 +40,30 @@ class BoxdrawExtension {
     public channel: vscode.OutputChannel;
     /** statusvar for user */
     public statusbaritem: vscode.StatusBarItem;
+
+    // data
+
+    /** code to char mapping array */
+    public static boxchars: { char: string, val: number }[] = [
+        { val: 0b00000011, char: "└" },
+        { val: 0b00000100, char: "" },
+        { val: 0b00000101, char: "│" },
+        { val: 0b00000110, char: "┌" },
+        { val: 0b00000111, char: "├" },
+        { val: 0b00001000, char: "" },
+        { val: 0b00001001, char: "┘" },
+        { val: 0b00001010, char: "─" },
+        { val: 0b00001011, char: "┴" },
+        { val: 0b00001100, char: "┐" },
+        { val: 0b00001101, char: "┤" },
+        { val: 0b00001110, char: "┬" },
+        { val: 0b00001111, char: "┼" },
+        { val: 0b00000101, char: "↑" },
+        { val: 0b00000101, char: "↓" },
+        { val: 0b00001010, char: "→" },
+        { val: 0b00001010, char: "←" }
+    ];
+
 
     // method
 
@@ -60,12 +86,14 @@ class BoxdrawExtension {
 
         // init context
         this.mode = false;
+        this.square = false;
         this.debug = false;
 
         // init vscode
 
         // - command
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleMode`, () => { boxdrawextension.toggleMode(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleSquare`, () => { boxdrawextension.toggleSquare(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorUp`, () => { boxdrawextension.cursorUp(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorDown`, () => { boxdrawextension.cursorDown(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeft`, () => { boxdrawextension.drawBox("left"); }));
@@ -89,6 +117,7 @@ class BoxdrawExtension {
 
         // - setcontext
         this.setMode(false, true);
+        this.setSquare(false, true);
     }
 
     // public interface
@@ -99,6 +128,14 @@ class BoxdrawExtension {
         if (this.debug) this.channel.appendLine(`--------`);
 
         this.setMode(!this.mode);
+    }
+
+    /** toggle square */
+    public toggleSquare() {
+
+        if (this.debug) this.channel.appendLine(`--------`);
+
+        this.setSquare(!this.square);
     }
 
     /** move to previous line */
@@ -265,25 +302,46 @@ class BoxdrawExtension {
 
     /** text to replace */
     public getReplaceText(ppoc: PosColumn, cpoc: PosColumn, npoc: PosColumn, direction: string, isarrow: boolean, isclear: boolean) {
-        ppoc;
-        cpoc;
-        npoc;
-        direction;
-        // TODO 罫線対応
-        if (true) {
+        if (boxdrawextension.square) {
             if (isarrow) return "□";
             if (isclear) return "  ";
             return "■";
+        } else {
+            // TODO 罫線対応
+            let uval = BoxdrawExtension.boxchars.find(x => x.char == ppoc.ctxt)?.val;
+            let lval = BoxdrawExtension.boxchars.find(x => x.char == cpoc.ptxt)?.val;
+            let rval = BoxdrawExtension.boxchars.find(x => x.char == cpoc.ntxt)?.val;
+            let dval = BoxdrawExtension.boxchars.find(x => x.char == npoc.ctxt)?.val;
+            let cval = ((uval & 0b00000100) ? 0b00000001 : 0)
+                | ((rval & 0b00001000) ? 0b00000010 : 0)
+                | ((dval & 0b00000001) ? 0b00000100 : 0)
+                | ((lval & 0b00000010) ? 0b00001000 : 0);
+            if (cval) {
+                if (direction == "up") cval |= 0b00000001;
+                if (direction == "right") cval |= 0b00000010;
+                if (direction == "down") cval |= 0b00000100;
+                if (direction == "left") cval |= 0b00001000;
+            } else {
+                if (direction == "up") cval |= 0b00000101;
+                if (direction == "right") cval |= 0b00001010;
+                if (direction == "down") cval |= 0b00000101;
+                if (direction == "left") cval |= 0b00001010;
+            }
+            let ctxt = BoxdrawExtension.boxchars.find(x => x.val == cval)?.char;
+            this.channel.appendLine([ppoc.ctxt, cpoc.ptxt, cpoc.ntxt, npoc.ctxt, uval, lval, rval, dval, cval, ctxt].toString());
+            return ctxt;
+
         }
     }
 
     /** check replace or not */
     public isReplaceOrNot(cpoc: PosColumn, rtxt: string, direction: string, isarrow: boolean, isclear: boolean) {
-        direction;
-        // TODO 罫線対応
-        if (true) {
+        if (boxdrawextension.square) {
             if (isarrow) return cpoc.ctxt != rtxt;
             if (isclear) return cpoc.ctxt == "■" || cpoc.ctxt == "□";
+            return cpoc.ctxt != rtxt;
+        } else {
+            // TODO 罫線対応
             return cpoc.ctxt != rtxt;
         }
     }
@@ -302,13 +360,28 @@ class BoxdrawExtension {
         }
     }
 
+    /** set square */
+    public setSquare(square: boolean, force = false) {
+
+        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setSquare(${[...arguments]})`);
+
+        if (this.square != square || force) {
+            this.square = square;
+            vscode.commands.executeCommand('setContext', `${this.appname}Square`, this.square);
+            this.updateStatusbar();
+        }
+    }
+
     /** update statusbar */
     public updateStatusbar() {
 
         if (this.debug) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
 
         let msg = "";
-        msg += this.mode ? "$(edit)" : ""
+        if (this.mode) {
+            if (this.square) msg += "$(primitive-square)";
+            else msg += "$(edit)";
+        }
         msg += this.applabel;
         this.statusbaritem.text = msg;
     }
@@ -344,29 +417,6 @@ class PosColumn {
     public rbgnchr2: number;
     /** after character number for replace */
     public rendchr2: number;
-    /** code to char mapping array */
-    public static boxchars: { char: string, val: number }[] = [
-        { val: 0b00000000, char: "  " },
-        { val: 0b00000001, char: "" },
-        { val: 0b00000010, char: "" },
-        { val: 0b00000011, char: "└" },
-        { val: 0b00000100, char: "" },
-        { val: 0b00000101, char: "│" },
-        { val: 0b00000110, char: "┌" },
-        { val: 0b00000111, char: "├" },
-        { val: 0b00001000, char: "" },
-        { val: 0b00001001, char: "┘" },
-        { val: 0b00001010, char: "─" },
-        { val: 0b00001011, char: "┴" },
-        { val: 0b00001100, char: "┐" },
-        { val: 0b00001101, char: "┤" },
-        { val: 0b00001110, char: "┬" },
-        { val: 0b00001111, char: "┼" },
-        { val: 0b00000101, char: "↑" },
-        { val: 0b00000101, char: "↓" },
-        { val: 0b00001010, char: "→" },
-        { val: 0b00001010, char: "←" }
-    ];
 
     /** constructor*/
     constructor(line: number, column: number) {
