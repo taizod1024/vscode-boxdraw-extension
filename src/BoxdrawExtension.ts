@@ -2,18 +2,7 @@ import { assert } from 'console';
 import * as vscode from 'vscode';
 var eaw = require('eastasianwidth');
 
-// # NOTE
-// - vscode
-//      - vscodeの全角文字の実装は不完全、以下のisFullWidthCharacter()を参照のこと
-//          https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts
-//      - 罫線文字は表示幅は半角2文字分だが、表示桁数は半角1文字で計算されている
-// - boxdraw-extension
-//      - cursorDownが最下行では行末に移動する動きは実装しない
-//      - cursorUpSelect/cursorDownSelectは実装しない
-//      - タブ文字は対象外
-//      - マルチカーソルは対象外
-
-/** Direction type */
+/** direction type */
 type Direction = "up" | "right" | "down" | "left";
 
 // constant
@@ -183,7 +172,7 @@ class BoxdrawExtension {
             // next line
             await editor.edit(() => {
                 let cpoc = PosColumn.getCursor(); // current poscolumn
-                if (cpoc.line <= document.lineCount - 1) {
+                if (cpoc.line < document.lineCount - 1) {
                     cpoc.line++;
                     let cpos = cpoc.toPosition(); // current position
                     editor.selection = new vscode.Selection(cpos, cpos);
@@ -198,6 +187,7 @@ class BoxdrawExtension {
 
     /** draw line, draw arrow, clear line */
     protected async drawBox(direction: Direction, isarrow = false, isclear = false) {
+        // TODO キーを押し続けて消すと消し忘れがある。
 
         try {
             if (this.debug) this.channel.appendLine(`--------`);
