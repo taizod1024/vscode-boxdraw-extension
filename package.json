@@ -1,0 +1,211 @@
+{
+  "name": "boxdraw-extension",
+  "displayName": "Boxdraw",
+  "description": "vscode boxdraw extension",
+  "version": "0.0.0",
+  "engines": {
+    "vscode": "^1.55.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "publisher": "taizod1024",
+  "main": "./build/extension.js",
+  "activationEvents": [
+    "*"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "boxdraw-extension.toggleMode",
+        "title": "Boxdraw: Toggle Mode"
+      },
+      {
+        "command": "boxdraw-extension.toggleBlock",
+        "title": "Boxdraw: Toggle Block"
+      },
+      {
+        "command": "boxdraw-extension.cursorUp",
+        "title": "Boxdraw: previous line"
+      },
+      {
+        "command": "boxdraw-extension.cursorDown",
+        "title": "Boxdraw: next line"
+      },
+      {
+        "command": "boxdraw-extension.drawLeft",
+        "title": "Boxdraw: Draw Left"
+      },
+      {
+        "command": "boxdraw-extension.drawRight",
+        "title": "Boxdraw: Draw Right"
+      },
+      {
+        "command": "boxdraw-extension.drawUp",
+        "title": "Boxdraw: Draw Up"
+      },
+      {
+        "command": "boxdraw-extension.drawDown",
+        "title": "Boxdraw: Draw Down"
+      },
+      {
+        "command": "boxdraw-extension.drawLeftArrow",
+        "title": "Boxdraw: Draw Left Arrow"
+      },
+      {
+        "command": "boxdraw-extension.drawRightArrow",
+        "title": "Boxdraw: Draw Right Arrow"
+      },
+      {
+        "command": "boxdraw-extension.drawUpArrow",
+        "title": "Boxdraw: Draw Up Arrow"
+      },
+      {
+        "command": "boxdraw-extension.drawDownArrow",
+        "title": "Boxdraw: Draw Down Arrow"
+      },
+      {
+        "command": "boxdraw-extension.clearLeft",
+        "title": "Boxdraw: Clear Left"
+      },
+      {
+        "command": "boxdraw-extension.clearRight",
+        "title": "Boxdraw: Clear Right"
+      },
+      {
+        "command": "boxdraw-extension.clearUp",
+        "title": "Boxdraw: Clear Up"
+      },
+      {
+        "command": "boxdraw-extension.clearDown",
+        "title": "Boxdraw: Clear Down"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "boxdraw-extension.toggleMode",
+        "key": "ctrl+alt+m"
+      },
+      {
+        "command": "boxdraw-extension.toggleBlock",
+        "key": "ctrl+alt+b"
+      },
+      {
+        "command": "boxdraw-extension.cursorUp",
+        "key": "up",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.cursorDown",
+        "key": "down",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawLeft",
+        "key": "ctrl+left",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawRight",
+        "key": "ctrl+right",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawUp",
+        "key": "ctrl+up",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawDown",
+        "key": "ctrl+down",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawLeftArrow",
+        "key": "ctrl+alt+left",
+        "when": "editorTextFocus && boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawRightArrow",
+        "key": "ctrl+alt+right",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawUpArrow",
+        "key": "ctrl+alt+up",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.drawDownArrow",
+        "key": "ctrl+alt+down",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.clearLeft",
+        "key": "ctrl+shift+left",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.clearRight",
+        "key": "ctrl+shift+right",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.clearUp",
+        "key": "ctrl+shift+up",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw-extension.clearDown",
+        "key": "ctrl+shift+down",
+        "when": "boxdrawMode"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./build/test/runTest.js",
+    "release": "git switch main && git merge --no-ff develop && npx standard-version && vsce publish && git push --follow-tags origin main && git push origin develop && git switch develop"
+  },
+  "author": "yamamoto.taizo <taizod1024@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@commitlint/cli": "^12.1.1",
+    "@commitlint/config-conventional": "^12.1.1",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^12.20.15",
+    "@types/superagent": "^4.1.10",
+    "@types/superagent-proxy": "^2.0.0",
+    "@types/vscode": "^1.57.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "bufferutil": "^4.0.3",
+    "eslint": "^7.19.0",
+    "generator-code": "^1.4.13",
+    "husky": "^4.3.8",
+    "mocha": "^8.3.2",
+    "standard-version": "^9.2.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.3.2",
+    "utf-8-validate": "^5.0.5",
+    "vscode": "^0.9.9",
+    "vscode-test": "^1.5.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taizod1024/boxdraw-extension.git"
+  },
+  "dependencies": {
+    "eastasianwidth": "^0.2.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "./bin/check_no_main_branch.sh",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+}
