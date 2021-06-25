@@ -38,6 +38,8 @@
          https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts
 - boxdraw-extension
     - 仕様
+        - cursorUp/cursorDown
+            - 罫線文字が内部的に半角1文字で計算されていることによるカーソルの縦方向の移動のがたつきを制します。
         - cursorDown
             - 最下行では行末に移動する動きは実装しません。
         - cursorUpSelect/cursorDownSelect
