@@ -4,7 +4,7 @@
   "description": "vscode boxdraw extension",
   "version": "0.0.0",
   "engines": {
-    "vscode": "^1.55.0"
+    "vscode": "^1.57.0"
   },
   "categories": [
     "Other"
