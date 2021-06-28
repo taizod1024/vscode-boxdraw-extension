@@ -1,4 +1,5 @@
 import { assert } from 'console';
+import { Dir } from 'fs';
 import * as vscode from 'vscode';
 var eaw = require('eastasianwidth');
 
@@ -187,7 +188,7 @@ class BoxdrawExtension {
 
     /** draw line, draw arrow, clear line */
     protected async drawBox(direction: Direction, isarrow = false, isclear = false) {
-        // TODO キーを押し続けて消すと消し忘れがある。
+        // TODO キーを押し続けて消すと消し忘れがある
 
         try {
             if (this.debug) this.channel.appendLine(`--------`);
@@ -212,27 +213,34 @@ class BoxdrawExtension {
                 "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "] " + cpoc.rbgnchr + ", " + cpoc.rbgnchr2 + ", " + cpoc.rendchr2 + ", " + cpoc.rendchr + "\n" +
                 "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "] " + npoc.rbgnchr + ", " + npoc.rbgnchr2 + ", " + npoc.rendchr2 + ", " + npoc.rendchr);
 
-            // check current position
-            let rtxt = this.getReplaceText(ppoc, cpoc, npoc, direction, isarrow, isclear, true);
-            if (this.isReplaceOrNot(cpoc, rtxt, direction, isarrow, isclear)) {
+            // check 1st position
+            let pot = new PosText(ppoc, cpoc, npoc, direction, isarrow, isclear);
+            pot.getReplaceText(true);
+            if (pot.isReplaceOrNot()) {
 
-                // draw current position
+                // draw 1st position
                 await editor.edit(builder => {
                     const rbpos = new vscode.Position(cpoc.line, cpoc.rbgnchr); // replace begin position
                     const repos = new vscode.Position(cpoc.line, cpoc.rendchr); // replace end position
                     const range = new vscode.Range(rbpos, repos);
-                    builder.replace(range, " ".repeat(cpoc.rbgnchr2) + rtxt + " ".repeat(cpoc.rendchr2));
+                    builder.replace(range, " ".repeat(cpoc.rbgnchr2) + pot.text + " ".repeat(cpoc.rendchr2));
                 }).then(() => {
                     const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2); // current position
                     editor.selection = new vscode.Selection(cpos, cpos);
                     vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                 });
+
+                // when draw 1st position, exit if block
+                if (boxdrawextension.block) return;
+
+                // when draw 1st position, exit if no block and no line;
+                if (pot.oval == 0) return;
             }
 
             // exit if arrow
             if (isarrow) return;
 
-            // check move or not
+            // check move 2nd postion or not
             let ismoved = false;
             if (direction == "up") {
                 if (cpoc.line >= 1) {
@@ -260,10 +268,10 @@ class BoxdrawExtension {
                 npoc.column += 2;
             }
 
-            // exit if not moved
+            // exit if not moved 2nd position
             if (!ismoved) return;
 
-            // check next position
+            // check 2nd position
             ppoc.toPosition();
             cpoc.toPosition(true);
             npoc.toPosition();
@@ -279,7 +287,7 @@ class BoxdrawExtension {
                 // add new line
                 await editor.edit(builder => {
                     const line = document.lineAt(document.lineCount - 1);
-                    builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + rtxt);
+                    builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + pot.text);
                 }).then(() => {
                     const cpos = new vscode.Position(cpoc.line, cpoc.column);
                     editor.selection = new vscode.Selection(cpos, cpos);
@@ -289,15 +297,15 @@ class BoxdrawExtension {
             }
 
             // check next position
-            rtxt = this.getReplaceText(ppoc, cpoc, npoc, direction, isarrow, isclear, false);
-            if (this.isReplaceOrNot(cpoc, rtxt, direction, isarrow, isclear)) {
+            pot.getReplaceText(false);
+            if (pot.isReplaceOrNot()) {
 
                 // rewrite existing line
                 await editor.edit(builder => {
                     const posbgn = new vscode.Position(cpoc.line, cpoc.rbgnchr);
                     const posend = new vscode.Position(cpoc.line, cpoc.rendchr);
                     const range = new vscode.Range(posbgn, posend);
-                    builder.replace(range, " ".repeat(cpoc.rbgnchr2) + rtxt + " ".repeat(cpoc.rendchr2));
+                    builder.replace(range, " ".repeat(cpoc.rbgnchr2) + pot.text + " ".repeat(cpoc.rendchr2));
                 }).then(() => {
                     const cpos = new vscode.Position(cpoc.line, cpoc.rbgnchr + cpoc.rbgnchr2);
                     editor.selection = new vscode.Selection(cpos, cpos);
@@ -318,104 +326,6 @@ class BoxdrawExtension {
 
     // inner interface
 
-    /** text to replace */
-    public getReplaceText(ppoc: PosColumn, cpoc: PosColumn, npoc: PosColumn, direction: Direction, isarrow: boolean, isclear: boolean, isfirst: boolean) {
-        if (boxdrawextension.block) {
-            if (isarrow) return "□";
-            if (isclear) return "  ";
-            return "■";
-        } else {
-            // arrow
-            if (isarrow) {
-                if (direction == "up") return "↑";
-                if (direction == "right") return "→";
-                if (direction == "down") return "↓";
-                if (direction == "left") return "←";
-                return "";
-            }
-            // calc value by neighbors
-            let uval = BoxdrawExtension.boxchars.find(x => x.char == ppoc.ctxt)?.val;
-            let lval = BoxdrawExtension.boxchars.find(x => x.char == cpoc.ptxt)?.val;
-            let rval = BoxdrawExtension.boxchars.find(x => x.char == cpoc.ntxt)?.val;
-            let dval = BoxdrawExtension.boxchars.find(x => x.char == npoc.ctxt)?.val;
-            let cval = ((uval & 0b00000100) ? 0b00000001 : 0)
-                | ((rval & 0b00001000) ? 0b00000010 : 0)
-                | ((dval & 0b00000001) ? 0b00000100 : 0)
-                | ((lval & 0b00000010) ? 0b00001000 : 0);
-            if (!isclear) {
-                // bit-or value by direction
-                if (cval) {
-                    // bit-or near side at first time
-                    if (isfirst) {
-                        if (direction == "up") cval |= 0b00000001;
-                        if (direction == "right") cval |= 0b00000010;
-                        if (direction == "down") cval |= 0b00000100;
-                        if (direction == "left") cval |= 0b00001000;
-                    }
-                    // bit-or far side at second time
-                    else {
-                        if (direction == "up") cval |= 0b00000100;
-                        if (direction == "right") cval |= 0b00001000;
-                        if (direction == "down") cval |= 0b00000001;
-                        if (direction == "left") cval |= 0b00000010;
-                    }
-
-                } else {
-                    // bit-or both side at blank area
-                    if (direction == "up") cval |= 0b00000101;
-                    if (direction == "right") cval |= 0b00001010;
-                    if (direction == "down") cval |= 0b00000101;
-                    if (direction == "left") cval |= 0b00001010;
-                }
-                // correct value by bit-direction
-                if ([0b00000001, 0b00000010, 0b00000100, 0b00001000].includes(cval)) {
-                    if (direction == "up") cval |= 0b00000101;
-                    if (direction == "right") cval |= 0b00001010;
-                    if (direction == "down") cval |= 0b00000101;
-                    if (direction == "left") cval |= 0b00001010;
-                }
-            } else {
-                // bit-and value by direction
-                if (cval) {
-                    // bit-and near side at first time
-                    if (isfirst) {
-                        if (direction == "up") cval &= 0b11111110;
-                        if (direction == "right") cval &= 0b11111101;
-                        if (direction == "down") cval &= 0b11111011;
-                        if (direction == "left") cval &= 0b11110111;
-                    }
-                    // bit-and far side at second time
-                    else {
-                        if (direction == "up") cval &= 0b11111011;
-                        if (direction == "right") cval &= 0b11110111;
-                        if (direction == "down") cval &= 0b11111110;
-                        if (direction == "left") cval &= 0b11111101;
-                    }
-                }
-                // correct value by direction
-                if ([0b00000001, 0b00000010, 0b00000100, 0b00001000].includes(cval)) {
-                    cval &= 0b00000000;
-                }
-            }
-            // convert to text
-            let ctxt = BoxdrawExtension.boxchars.find(x => x.val == cval)?.char;
-            return ctxt;
-        }
-    }
-
-    /** check replace or not */
-    public isReplaceOrNot(cpoc: PosColumn, rtxt: string, direction: Direction, isarrow: boolean, isclear: boolean) {
-        direction;
-        if (boxdrawextension.block) {
-            if (isarrow) return cpoc.ctxt != rtxt;
-            if (isclear) return cpoc.ctxt == "■" || cpoc.ctxt == "□";
-            return cpoc.ctxt != rtxt;
-        } else {
-            if (isarrow) return cpoc.ctxt != rtxt;
-            if (isclear) return BoxdrawExtension.boxchars.find(x => x.char == cpoc.ctxt) != null;
-            return cpoc.ctxt != rtxt;
-        }
-    }
 
     /** set mode */
     public setMode(mode: boolean, force = false) {
@@ -600,3 +510,131 @@ class PosColumn {
         return pos;
     }
 }
+
+/** position text */
+class PosText {
+
+    public ppoc: PosColumn;
+    public cpoc: PosColumn;
+    public npoc: PosColumn;
+    public direction: Direction;
+    public isarrow: boolean;
+    public isclear: boolean;
+    public oval: number;
+    public cval: number;
+    public text: string;
+
+    /** constructor */
+    constructor(ppoc: PosColumn, cpoc: PosColumn, npoc: PosColumn, direction: Direction, isarrow: boolean, isclear: boolean) {
+        this.ppoc = ppoc;
+        this.cpoc = cpoc;
+        this.npoc = npoc;
+        this.direction = direction;
+        this.isarrow = isarrow;
+        this.isclear = isclear;
+    }
+
+    /** text to replace */
+    public getReplaceText(isfirst: boolean) {
+        if (boxdrawextension.block) {
+            if (this.isarrow) this.text = "□";
+            else if (this.isclear) this.text = "  ";
+            else this.text = "■";
+            return this.text;
+        } else {
+            // arrow
+            if (this.isarrow) {
+                if (this.direction == "up") this.text = "↑";
+                else if (this.direction == "right") this.text = "→";
+                else if (this.direction == "down") this.text = "↓";
+                else if (this.direction == "left") this.text = "←";
+                else this.text = "";
+                return this.text;
+            }
+            // calc value by neighbors
+            let uval = BoxdrawExtension.boxchars.find(x => x.char == this.ppoc.ctxt)?.val;
+            let lval = BoxdrawExtension.boxchars.find(x => x.char == this.cpoc.ptxt)?.val;
+            let rval = BoxdrawExtension.boxchars.find(x => x.char == this.cpoc.ntxt)?.val;
+            let dval = BoxdrawExtension.boxchars.find(x => x.char == this.npoc.ctxt)?.val;
+            let cval = ((uval & 0b00000100) ? 0b00000001 : 0)
+                | ((rval & 0b00001000) ? 0b00000010 : 0)
+                | ((dval & 0b00000001) ? 0b00000100 : 0)
+                | ((lval & 0b00000010) ? 0b00001000 : 0);
+            this.oval = cval;
+            if (!this.isclear) {
+                // bit-or value by direction
+                if (cval) {
+                    // bit-or near side at first time
+                    if (isfirst) {
+                        if (this.direction == "up") cval |= 0b00000001;
+                        if (this.direction == "right") cval |= 0b00000010;
+                        if (this.direction == "down") cval |= 0b00000100;
+                        if (this.direction == "left") cval |= 0b00001000;
+                    }
+                    // bit-or far side at second time
+                    else {
+                        if (this.direction == "up") cval |= 0b00000100;
+                        if (this.direction == "right") cval |= 0b00001000;
+                        if (this.direction == "down") cval |= 0b00000001;
+                        if (this.direction == "left") cval |= 0b00000010;
+                    }
+
+                } else {
+                    // bit-or both side at blank area
+                    if (this.direction == "up") cval |= 0b00000101;
+                    if (this.direction == "right") cval |= 0b00001010;
+                    if (this.direction == "down") cval |= 0b00000101;
+                    if (this.direction == "left") cval |= 0b00001010;
+                }
+                // correct value by bit-direction
+                if ([0b00000001, 0b00000010, 0b00000100, 0b00001000].includes(cval)) {
+                    if (this.direction == "up") cval |= 0b00000101;
+                    if (this.direction == "right") cval |= 0b00001010;
+                    if (this.direction == "down") cval |= 0b00000101;
+                    if (this.direction == "left") cval |= 0b00001010;
+                }
+            } else {
+                // bit-and value by direction
+                if (cval) {
+                    // bit-and near side at first time
+                    if (isfirst) {
+                        if (this.direction == "up") cval &= 0b11111110;
+                        if (this.direction == "right") cval &= 0b11111101;
+                        if (this.direction == "down") cval &= 0b11111011;
+                        if (this.direction == "left") cval &= 0b11110111;
+                    }
+                    // bit-and far side at second time
+                    else {
+                        if (this.direction == "up") cval &= 0b11111011;
+                        if (this.direction == "right") cval &= 0b11110111;
+                        if (this.direction == "down") cval &= 0b11111110;
+                        if (this.direction == "left") cval &= 0b11111101;
+                    }
+                }
+                // correct value by direction
+                if ([0b00000001, 0b00000010, 0b00000100, 0b00001000].includes(cval)) {
+                    cval &= 0b00000000;
+                }
+            }
+            // convert to text
+            this.text = BoxdrawExtension.boxchars.find(x => x.val == cval)?.char;
+            this.cval= cval;
+            return this.text;
+        }
+    }
+
+    /** check replace or not */
+    public isReplaceOrNot() {
+        if (boxdrawextension.block) {
+            if (this.isarrow) return this.cpoc.ctxt != this.text;
+            if (this.isclear) return this.cpoc.ctxt == "■" || this.cpoc.ctxt == "□";
+            return this.cpoc.ctxt != this.text;
+        } else {
+            if (this.isarrow) return this.cpoc.ctxt != this.text;
+            if (this.isclear) return BoxdrawExtension.boxchars.find(x => x.char == this.cpoc.ctxt) != null;
+            return this.cpoc.ctxt != this.text;
+        }
+    }
+
+}
+
