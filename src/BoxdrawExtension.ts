@@ -6,7 +6,6 @@ var eaw = require('eastasianwidth');
 /** direction type */
 type Direction = "up" | "right" | "down" | "left";
 
-// constant
 /** boxdraw-extesnion class */
 class BoxdrawExtension {
 
@@ -325,7 +324,6 @@ class BoxdrawExtension {
     }
 
     // inner interface
-
 
     /** set mode */
     public setMode(mode: boolean, force = false) {
