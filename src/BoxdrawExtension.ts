@@ -187,7 +187,6 @@ class BoxdrawExtension {
 
     /** draw line, draw arrow, clear line */
     protected async drawBox(direction: Direction, isarrow = false, isclear = false) {
-        // TODO キーを押し続けて消すと消し忘れがある
 
         try {
             if (this.debug) this.channel.appendLine(`--------`);
