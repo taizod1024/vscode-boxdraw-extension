@@ -197,7 +197,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/taizod1024/boxdraw-extension.git"
+    "url": "https://github.com/taizod1024/vscode-boxdraw-extension.git"
   },
   "dependencies": {
     "eastasianwidth": "^0.2.0"
