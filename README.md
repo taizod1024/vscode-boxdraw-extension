@@ -47,7 +47,7 @@
             - 最下行では行末に移動する動きは実装していません。
         - cursorUpSelect/cursorDownSelect
             - 選択領域の制御は実装していません。
-            
+
 ## 謝辞
 
 - boxdraw-extension の基本的なアイデアは xyzzy の boxdraw.l を参考にしています。
