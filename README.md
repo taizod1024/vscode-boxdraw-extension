@@ -1,7 +1,5 @@
 # Boxdraw Extension
 
-![Status-WIP](https://img.shields.io/badge/Status-WIP-orange)
-
 罫線文字で図を描くための拡張機能です。
 
 ![boxdraw](https://github.com/taizod1024/vscode-boxdraw-extension/blob/main/images/boxdraw.gif?raw=true)
@@ -36,11 +34,11 @@
         - 日本語フォントは等幅のものを設定してください。
         - スペースによるインデントにしてください。
         - マルチカーソルには対応していません。
-    - 挙動
+    - 仕様
         - vscodeの全角文字の扱いは不完全です。多くの全角記号が内部的に半角文字として扱われているためです。罫線文字も例外ではなく、表示幅は半角2文字分ですが表示桁数は半角1文字で計算されています。
     - 実装
         - vscodeの全角文字の実装は以下のURLのisFullWidthCharacter()をご覧ください。
-         https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts
+             https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts
 - boxdraw-extension
     - 仕様
         - cursorUp/cursorDown
