@@ -1,13 +1,13 @@
 # Boxdraw Extension
 
-罫線文字で図を描くための拡張機能です。
+罫線文字で図形を描くための拡張機能です。
 
 ![boxdraw](https://github.com/taizod1024/vscode-boxdraw-extension/blob/main/images/boxdraw.gif?raw=true)
 
 ## 機能
 
-罫線文字および矢印で図を描けます。
-罫線文字以外にブロック文字でも図を描けます。
+罫線文字および矢印で図形を描けます。
+罫線文字以外にブロック文字でも図形を描けます。
 
 ## 使い方
 
@@ -50,4 +50,4 @@
 
 ## 謝辞
 
-- boxdraw-extension の基本的なアイデアは xyzzy の boxdraw.l を参考にしています。
+- Boxdraw Extension の基本的なアイデアは xyzzy の boxdraw.l を参考にしています。
