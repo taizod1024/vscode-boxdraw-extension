@@ -23,62 +23,6 @@
       {
         "command": "boxdraw-extension.toggleBlock",
         "title": "Boxdraw: Toggle Block"
-      },
-      {
-        "command": "boxdraw-extension.cursorUp",
-        "title": "Boxdraw: previous line"
-      },
-      {
-        "command": "boxdraw-extension.cursorDown",
-        "title": "Boxdraw: next line"
-      },
-      {
-        "command": "boxdraw-extension.drawLeft",
-        "title": "Boxdraw: Draw Left"
-      },
-      {
-        "command": "boxdraw-extension.drawRight",
-        "title": "Boxdraw: Draw Right"
-      },
-      {
-        "command": "boxdraw-extension.drawUp",
-        "title": "Boxdraw: Draw Up"
-      },
-      {
-        "command": "boxdraw-extension.drawDown",
-        "title": "Boxdraw: Draw Down"
-      },
-      {
-        "command": "boxdraw-extension.drawLeftArrow",
-        "title": "Boxdraw: Draw Left Arrow"
-      },
-      {
-        "command": "boxdraw-extension.drawRightArrow",
-        "title": "Boxdraw: Draw Right Arrow"
-      },
-      {
-        "command": "boxdraw-extension.drawUpArrow",
-        "title": "Boxdraw: Draw Up Arrow"
-      },
-      {
-        "command": "boxdraw-extension.drawDownArrow",
-        "title": "Boxdraw: Draw Down Arrow"
-      },
-      {
-        "command": "boxdraw-extension.clearLeft",
-        "title": "Boxdraw: Clear Left"
-      },
-      {
-        "command": "boxdraw-extension.clearRight",
-        "title": "Boxdraw: Clear Right"
-      },
-      {
-        "command": "boxdraw-extension.clearUp",
-        "title": "Boxdraw: Clear Up"
-      },
-      {
-        "command": "boxdraw-extension.clearDown",
-        "title": "Boxdraw: Clear Down"
       }
     ],
     "keybindings": [

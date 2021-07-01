@@ -14,8 +14,6 @@ class BoxdrawExtension {
     public appname: string;
     /** application id for vscode */
     public appid: string;
-    /** label for log */
-    public applabel: string;
 
     // context
 
@@ -64,7 +62,6 @@ class BoxdrawExtension {
         // init constant
         this.appname = "boxdraw";
         this.appid = "boxdraw-extension";
-        this.applabel = "BOXDRAW";
     }
 
     /** activate extension */
@@ -85,6 +82,7 @@ class BoxdrawExtension {
         // - command
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleMode`, () => { boxdrawextension.toggleMode(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.toggleBlock`, () => { boxdrawextension.toggleBlock(); }));
+        context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.transitionModes`, () => { boxdrawextension.transitionModes(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorUp`, () => { boxdrawextension.cursorUp(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.cursorDown`, () => { boxdrawextension.cursorDown(); }));
         context.subscriptions.push(vscode.commands.registerCommand(`${this.appid}.drawLeft`, () => { boxdrawextension.drawBox("left"); }));
@@ -102,7 +100,7 @@ class BoxdrawExtension {
 
         // - statusbar
         this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-        this.statusbaritem.command = `${this.appid}.toggleMode`;
+        this.statusbaritem.command = `${this.appid}.transitionModes`;
         this.statusbaritem.show();
         context.subscriptions.push(this.statusbaritem);
 
@@ -127,6 +125,22 @@ class BoxdrawExtension {
         if (this.debug) this.channel.appendLine(`--------`);
 
         this.setBlock(!this.block);
+    }
+
+    /** transition modes */
+    public transitionModes() {
+
+        if (this.debug) this.channel.appendLine(`--------`);
+
+        if (!this.mode) {
+            this.setMode(true);
+            this.setBlock(false);
+        } else if (!this.block) {
+            this.setBlock(true);
+        } else {
+            this.setMode(false);
+            this.setBlock(false);
+        }
     }
 
     /** move to previous line */
@@ -353,13 +367,8 @@ class BoxdrawExtension {
 
         if (this.debug) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
 
-        let msg = "";
-        msg += this.applabel;
-        if (this.mode) {
-            if (this.block) msg += "$(primitive-square)";
-            else msg += "$(edit)";
-        }
-        this.statusbaritem.text = msg;
+        this.statusbaritem.backgroundColor = this.mode ? new vscode.ThemeColor("statusBarItem.errorBackground") : null;
+        this.statusbaritem.text = this.block ? "$(primitive-square)" : "$(edit)";
     }
 
     // utility
@@ -615,7 +624,7 @@ class PosText {
             }
             // convert to text
             this.text = BoxdrawExtension.boxchars.find(x => x.val == cval)?.char;
-            this.cval= cval;
+            this.cval = cval;
             return this.text;
         }
     }
