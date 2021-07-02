@@ -242,11 +242,11 @@ class BoxdrawExtension {
                     vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
                 });
 
-                // when draw 1st position, exit if block
+                // exit if block mode
                 if (boxdrawextension.block) return;
 
-                // when draw 1st position, exit if no block and no line;
-                if (pot.oval == 0) return;
+                // exit if no clear and no line;
+                if (!isclear && pot.oval == 0) return;
             }
 
             // exit if arrow
@@ -367,7 +367,7 @@ class BoxdrawExtension {
 
         if (this.debug) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
 
-        this.statusbaritem.backgroundColor = this.mode ? new vscode.ThemeColor("statusBarItem.errorBackground") : null;
+        this.statusbaritem.backgroundColor = this.mode ? new vscode.ThemeColor("statusBarItem.errorBackground") : undefined;
         this.statusbaritem.text = this.block ? "$(primitive-square)" : "$(edit)";
     }
 
