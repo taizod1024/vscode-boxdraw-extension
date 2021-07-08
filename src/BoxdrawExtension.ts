@@ -10,10 +10,14 @@ type Direction = "up" | "right" | "down" | "left";
 class BoxdrawExtension {
 
 
+    // constant
+
     /** application name for vscode */
-    public appname: string;
+    public appname = "boxdraw";
     /** application id for vscode */
-    public appid: string;
+    public appid = "boxdraw-extension";
+    /** flag for develop  */
+    public develop = true;
 
     // context
 
@@ -21,8 +25,6 @@ class BoxdrawExtension {
     public mode: boolean;
     /** flag for block */
     public block: boolean;
-    /** flag for debug  */
-    public debug: boolean;
 
     // vscode
 
@@ -59,9 +61,6 @@ class BoxdrawExtension {
     /** constructor */
     constructor() {
 
-        // init constant
-        this.appname = "boxdraw";
-        this.appid = "boxdraw-extension";
     }
 
     /** activate extension */
@@ -75,7 +74,6 @@ class BoxdrawExtension {
         // init context
         this.mode = false;
         this.block = false;
-        this.debug = false;
 
         // init vscode
 
@@ -114,7 +112,7 @@ class BoxdrawExtension {
     /** toggle mode */
     public toggleMode() {
 
-        if (this.debug) this.channel.appendLine(`--------`);
+        if (this.develop) this.channel.appendLine(`--------`);
 
         this.setMode(!this.mode);
     }
@@ -122,7 +120,7 @@ class BoxdrawExtension {
     /** toggle block */
     public toggleBlock() {
 
-        if (this.debug) this.channel.appendLine(`--------`);
+        if (this.develop) this.channel.appendLine(`--------`);
 
         this.setBlock(!this.block);
     }
@@ -130,7 +128,7 @@ class BoxdrawExtension {
     /** transition modes */
     public transitionModes() {
 
-        if (this.debug) this.channel.appendLine(`--------`);
+        if (this.develop) this.channel.appendLine(`--------`);
 
         if (!this.mode) {
             this.setMode(true);
@@ -147,7 +145,7 @@ class BoxdrawExtension {
     public async cursorUp() {
 
         try {
-            if (this.debug) this.channel.appendLine(`--------`);
+            if (this.develop) this.channel.appendLine(`--------`);
 
             // check editor and document exist
             const editor = vscode.window?.activeTextEditor;
@@ -175,7 +173,7 @@ class BoxdrawExtension {
     public async cursorDown() {
 
         try {
-            if (this.debug) this.channel.appendLine(`--------`);
+            if (this.develop) this.channel.appendLine(`--------`);
 
             // check editor and document exist
             const editor = vscode.window?.activeTextEditor;
@@ -203,8 +201,8 @@ class BoxdrawExtension {
     protected async drawBox(direction: Direction, isarrow = false, isclear = false) {
 
         try {
-            if (this.debug) this.channel.appendLine(`--------`);
-            if (this.debug) this.channel.appendLine(`[${this.timestamp()}] drawBox(${[...arguments]})`);
+            if (this.develop) this.channel.appendLine(`--------`);
+            if (this.develop) this.channel.appendLine(`[${this.timestamp()}] drawBox(${[...arguments]})`);
 
             // check editor and document exist
             const editor = vscode.window?.activeTextEditor;
@@ -220,7 +218,7 @@ class BoxdrawExtension {
             cpoc.toPosition();
             npoc.toPosition();
 
-            if (this.debug) this.channel.appendLine(
+            if (this.develop) this.channel.appendLine(
                 "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "] " + ppoc.rbgnchr + ", " + ppoc.rbgnchr2 + ", " + ppoc.rendchr2 + ", " + ppoc.rendchr + "\n" +
                 "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "] " + cpoc.rbgnchr + ", " + cpoc.rbgnchr2 + ", " + cpoc.rendchr2 + ", " + cpoc.rendchr + "\n" +
                 "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "] " + npoc.rbgnchr + ", " + npoc.rbgnchr2 + ", " + npoc.rendchr2 + ", " + npoc.rendchr);
@@ -288,7 +286,7 @@ class BoxdrawExtension {
             cpoc.toPosition(true);
             npoc.toPosition();
 
-            if (this.debug) this.channel.appendLine(
+            if (this.develop) this.channel.appendLine(
                 "- [" + ppoc.ptxt + "][" + ppoc.ctxt + "][" + ppoc.ntxt + "] " + ppoc.rbgnchr + ", " + ppoc.rbgnchr2 + ", " + ppoc.rendchr2 + ", " + ppoc.rendchr + "\n" +
                 "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "] " + cpoc.rbgnchr + ", " + cpoc.rbgnchr2 + ", " + cpoc.rendchr2 + ", " + cpoc.rendchr + "\n" +
                 "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "] " + npoc.rbgnchr + ", " + npoc.rbgnchr2 + ", " + npoc.rendchr2 + ", " + npoc.rendchr);
@@ -341,7 +339,7 @@ class BoxdrawExtension {
     /** set mode */
     public setMode(mode: boolean, force = false) {
 
-        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setMode(${[...arguments]})`);
+        if (this.develop) this.channel.appendLine(`[${this.timestamp()}] setMode(${[...arguments]})`);
 
         if (this.mode != mode || force) {
             this.mode = mode;
@@ -353,7 +351,7 @@ class BoxdrawExtension {
     /** set block */
     public setBlock(block: boolean, force = false) {
 
-        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setBlock(${[...arguments]})`);
+        if (this.develop) this.channel.appendLine(`[${this.timestamp()}] setBlock(${[...arguments]})`);
 
         if (this.block != block || force) {
             this.block = block;
@@ -365,7 +363,7 @@ class BoxdrawExtension {
     /** update statusbar */
     public updateStatusbar() {
 
-        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
+        if (this.develop) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
 
         this.statusbaritem.backgroundColor = this.mode ? new vscode.ThemeColor("statusBarItem.errorBackground") : undefined;
         this.statusbaritem.text = this.block ? "$(primitive-square)" : "$(edit)";
@@ -426,7 +424,7 @@ class PosColumn {
     /** get cursor cposition */
     public static getCursor(): PosColumn {
 
-        if (boxdrawextension.debug) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getActive(${[...arguments]})`);
+        if (boxdrawextension.develop) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getCursor(${[...arguments]})`);
 
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
@@ -434,14 +432,14 @@ class PosColumn {
         let bol = new vscode.Position(current.line, 0);
         let range = new vscode.Range(bol, current);
         let text = document.getText(range);
-        let cpos = new PosColumn(current.line, eaw.length(text));
-        return cpos;
+        let cpoc = new PosColumn(current.line, eaw.length(text));
+        return cpoc;
     }
 
     /** poscolum to position */
     public toPosition(fulfill = false) {
 
-        if (boxdrawextension.debug) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getPosition(${[...arguments]})`);
+        if (boxdrawextension.develop) boxdrawextension.channel.appendLine(`[${boxdrawextension.timestamp()}] getPosition(${[...arguments]})`);
 
         const editor = vscode.window.activeTextEditor;
         const document = editor.document;
