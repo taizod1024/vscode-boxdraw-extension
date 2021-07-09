@@ -131,7 +131,7 @@ class Boxdraw {
     /** toggle debug */
     public toggleDebug() {
 
-        if (this.debug) this.channel.appendLine(`--------`);
+        this.channel.appendLine(`--------`);
 
         this.setDebug(!this.debug);
     }
@@ -384,7 +384,7 @@ class Boxdraw {
     /** set debug */
     public setDebug(debug: boolean, force = false) {
 
-        if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setDebug(${[...arguments]})`);
+        this.channel.appendLine(`[${this.timestamp()}] setDebug(${[...arguments]})`);
 
         if (this.debug != debug || force) {
             this.debug = debug;
@@ -401,7 +401,7 @@ class Boxdraw {
         this.statusbaritem.backgroundColor = this.mode ? new vscode.ThemeColor("statusBarItem.errorBackground") : undefined;
         this.statusbaritem.text = "";
         this.statusbaritem.text += this.block ? "$(primitive-square)" : "$(edit)";
-        this.statusbaritem.text += this.debug ? " [debug]" : "";
+        this.statusbaritem.text += this.debug ? " debug" : "";
     }
 
     // utility
