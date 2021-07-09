@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { boxdrawextension } from './BoxdrawExtension';
+import { boxdraw } from './Boxdraw';
 
 // extension entrypoint
 export function activate(context: vscode.ExtensionContext) {
-    boxdrawextension.activate(context);
+    boxdraw.activate(context);
 }
 export function deactivate() { }
