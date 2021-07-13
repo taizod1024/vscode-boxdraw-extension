@@ -1,4 +1,4 @@
-# Boxdraw Extension
+# Boxdraw
 
 罫線文字で図形を描くための拡張機能です。
 
@@ -39,7 +39,7 @@
         - vscodeでは多くの全角記号が内部的には半角文字として扱われています。
         詳細は https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts のisFullWidthCharacter()をご覧ください。
         その結果、カーソルを上下移動させると左右にがたつきます。
-- boxdraw-extension
+- boxdraw
     - 仕様
         - cursorUp/cursorDown
             - 罫線文字が内部的に半角1文字で計算されていることによるカーソルの上下移動時の左右のがたつきを抑制します。
@@ -50,4 +50,4 @@
 
 ## 謝辞
 
-- Boxdraw Extension の基本的なアイデアは xyzzy の boxdraw.l を参考にしています。
+- Boxdraw の基本的なアイデアは xyzzy の boxdraw.l を参考にしています。
