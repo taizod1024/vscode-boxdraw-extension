@@ -71,7 +71,7 @@
       {
         "command": "boxdraw.drawLeftArrow",
         "key": "ctrl+alt+left",
-        "when": "editorTextFocus && boxdrawMode"
+        "when": "boxdrawMode"
       },
       {
         "command": "boxdraw.drawRightArrow",
