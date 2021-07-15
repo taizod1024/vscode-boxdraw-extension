@@ -14,5 +14,3 @@ src/**
 *.vsix
 *.zip
 *.js
-### template: package
-!template/**

@@ -1,5 +1,3 @@
-import { assert } from 'console';
-import { Dir } from 'fs';
 import * as vscode from 'vscode';
 var eaw = require('eastasianwidth');
 
