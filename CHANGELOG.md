@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.14](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.13...v0.0.14) (2021-07-15)
+
+
+### Bug Fixes
+
+* ステータスバーにツールチップ追加 ([0152efc](https://github.com/taizod1024/vscode-boxdraw-extension/commit/0152efce80ab3d3500714eee4dbf349db07dc00c))
+* 不要なステータスバーの更新を修正 ([f65f7d2](https://github.com/taizod1024/vscode-boxdraw-extension/commit/f65f7d2aa7436fdfe76566c2b7f519ccc8481fff))
+* 不要なライブラリの削除 ([3d951b6](https://github.com/taizod1024/vscode-boxdraw-extension/commit/3d951b634d68edbca008853d6ae0cb08802d65d9))
+
 ### [0.0.13](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.12...v0.0.13) (2021-07-13)
 
 
