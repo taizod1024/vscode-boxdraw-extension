@@ -1,5 +1,3 @@
-import { assert } from 'console';
-import { Dir } from 'fs';
 import * as vscode from 'vscode';
 var eaw = require('eastasianwidth');
 
@@ -102,6 +100,7 @@ class Boxdraw {
         // - statusbar
         this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         this.statusbaritem.command = `${this.appid}.transitionModes`;
+        this.statusbaritem.tooltip = this.appid;
         this.statusbaritem.show();
         context.subscriptions.push(this.statusbaritem);
 
@@ -389,7 +388,6 @@ class Boxdraw {
         if (this.debug != debug || force) {
             this.debug = debug;
             vscode.commands.executeCommand('setContext', `${this.appid}Debug`, this.debug);
-            this.updateStatusbar();
         }
     }
 
