@@ -387,7 +387,6 @@ class Boxdraw {
         if (this.debug != debug || force) {
             this.debug = debug;
             vscode.commands.executeCommand('setContext', `${this.appid}Debug`, this.debug);
-            this.updateStatusbar();
         }
     }
 
