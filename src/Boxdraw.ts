@@ -100,6 +100,7 @@ class Boxdraw {
         // - statusbar
         this.statusbaritem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         this.statusbaritem.command = `${this.appid}.transitionModes`;
+        this.statusbaritem.tooltip = this.appid;
         this.statusbaritem.show();
         context.subscriptions.push(this.statusbaritem);
 
