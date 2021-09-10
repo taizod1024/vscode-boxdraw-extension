@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.15](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.14...v0.0.15) (2021-09-10)
+
+
+### Bug Fixes
+
+* 初期化時チャネル非表示 ([5c2a6e6](https://github.com/taizod1024/vscode-boxdraw-extension/commit/5c2a6e6b0b0dc16b894a7b6badc8e46d261492e1))
+
 ### [0.0.14](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.13...v0.0.14) (2021-07-15)
 
 
