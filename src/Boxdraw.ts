@@ -7,7 +7,6 @@ type Direction = "up" | "right" | "down" | "left";
 /** boxdraw-extesnion class */
 class Boxdraw {
 
-
     // constant
 
     /** application id for vscode */
@@ -66,7 +65,6 @@ class Boxdraw {
 
         // init context
         this.channel = vscode.window.createOutputChannel(this.appid);
-        this.channel.show(true);
         this.channel.appendLine(`[${this.timestamp()}] ${this.appid} activated`);
 
         // init context
@@ -175,7 +173,9 @@ class Boxdraw {
             });
         }
         catch (ex) {
-            this.channel.appendLine(ex.stack);
+            if (ex instanceof Error) {
+                this.channel.appendLine(ex.stack);
+            }
         }
     }
 
@@ -203,7 +203,9 @@ class Boxdraw {
             });
         }
         catch (ex) {
-            this.channel.appendLine(ex.stack);
+            if (ex instanceof Error) {
+                this.channel.appendLine(ex.stack);
+            }
         }
     }
 
@@ -347,7 +349,9 @@ class Boxdraw {
             vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
         }
         catch (ex) {
-            this.channel.appendLine(ex.stack);
+            if (ex instanceof Error) {
+                this.channel.appendLine(ex.stack);
+            }
         }
         finally {
             this.isexecuting = false;
