@@ -2,7 +2,7 @@
   "name": "boxdraw-extension",
   "displayName": "Boxdraw",
   "description": "vscode boxdraw extension",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "engines": {
     "vscode": "^1.57.0"
   },
