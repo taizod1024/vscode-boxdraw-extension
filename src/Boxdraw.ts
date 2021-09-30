@@ -229,7 +229,7 @@ class Boxdraw {
             if (!editor) return;
             if (!document) return;
 
-            // check cursor poscolumn
+            // check 1st cursor poscolumn
             const cpoc = PosColumn.getCursor(); // current poscolumn
             const ppoc = new PosColumn(cpoc.line - 1, cpoc.column); // prev poscolumn
             const npoc = new PosColumn(cpoc.line + 1, cpoc.column); // next poscolumn
@@ -300,7 +300,7 @@ class Boxdraw {
             // exit if not moved 2nd position
             if (!ismoved) return;
 
-            // check 2nd position
+            // check 2nd cursor poscolumn
             ppoc.toPosition();
             cpoc.toPosition(true);
             npoc.toPosition();
@@ -310,24 +310,26 @@ class Boxdraw {
                 "- [" + cpoc.ptxt + "][" + cpoc.ctxt + "][" + cpoc.ntxt + "] " + cpoc.rbgnchr + ", " + cpoc.rbgnchr2 + ", " + cpoc.rendchr2 + ", " + cpoc.rendchr + "\n" +
                 "- [" + npoc.ptxt + "][" + npoc.ctxt + "][" + npoc.ntxt + "] " + npoc.rbgnchr + ", " + npoc.rbgnchr2 + ", " + npoc.rendchr2 + ", " + npoc.rendchr);
 
-            // check last line or not
-            if (cpoc.line == document.lineCount) {
-
-                // add new line
-                await editor.edit(builder => {
-                    const line = document.lineAt(document.lineCount - 1);
-                    builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + pot.text);
-                }).then(() => {
-                    const cpos = new vscode.Position(cpoc.line, cpoc.column);
-                    editor.selection = new vscode.Selection(cpos, cpos);
-                    vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
-                });
-                return;
-            }
-
-            // check next position
+            // check 2nd position
             pot.getReplaceText(false);
             if (pot.isReplaceOrNot()) {
+
+                // draw 2nd position
+
+                // check last line or not
+                if (cpoc.line == document.lineCount) {
+
+                    // add new line
+                    await editor.edit(builder => {
+                        const line = document.lineAt(document.lineCount - 1);
+                        builder.insert(line.range.end, "\n" + " ".repeat(cpoc.column) + pot.text);
+                    }).then(() => {
+                        const cpos = new vscode.Position(cpoc.line, cpoc.column);
+                        editor.selection = new vscode.Selection(cpos, cpos);
+                        vscode.commands.executeCommand('revealLine', { lineNumber: cpos.line });
+                    });
+                    return;
+                }
 
                 // rewrite existing line
                 await editor.edit(builder => {
