@@ -1,53 +1,52 @@
 # Boxdraw
 
-罫線文字で図形を描くための拡張機能です。
+vscode extension for drawing figures with ruled line characters.
 
 ![boxdraw](https://github.com/taizod1024/vscode-boxdraw-extension/blob/main/images/boxdraw.gif?raw=true)
 
-## 機能
+## features
 
-罫線文字および矢印で図形を描けます。
-罫線文字以外にブロック文字でも図形を描けます。
+You can draw figures with ruled line characters and arrows.
 
-## 使い方
+## usage
 
-### 共通
+### general
 
-|共通機能|キー|
+|function|keyboard shortcuts|
 |-|-|
-|罫線モードの有効／無効の切り替え|`ctrl + alt + m`|
+|enable / disable boxdraw mode|`ctrl + alt + m`|
 
-### 罫線モード
+### boxdraw mode
 
-|機能|キー|
+|function|keyboard shortcuts|
 |-|-|
-|罫線文字の描画|`ctrl + 矢印キー`|
-|矢印文字の描画| `ctrl + alt + 矢印キー`|
-|文字のクリア| `ctrl + shift + 矢印キー`|
-|描画モード（罫線＋矢印／ブロック）の切り替え| `ctrl + alt + b`|
-|カーソルの上下移動|`上下矢印キー`|
+|draw ruled line characters|`ctrl + arrow key`|
+|draw arrow characters| `ctrl + alt + arrow key`|
+|clear characters| `ctrl + shift + arrow key`|
+|switch the drawing mode (ruled line + arrow / block)| `ctrl + alt + b`|
+|move the cursor up and down|`up / down arrow key`|
 
-## 留意事項
+## note
 
 - vscode
-    - 設定
-        - 日本語フォントは等幅のものにしてください。
-        - スペースによるインデントにしてください。
-    - 制限
-        - マルチカーソルには対応していません。
-    - 全角文字の内部実装
-        - vscodeでは多くの全角記号が内部的には半角文字として扱われています。
-        詳細は https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts のisFullWidthCharacter()をご覧ください。
-        その結果、カーソルを上下移動させると左右にがたつきます。
+    - settings
+      - Please use monospaced Japanese fonts.
+      - Please indent by space.
+    - limitation
+        - Multi-cursor is not supported.
+    - internal implementation of double-byte characters
+        - In vscode, many double-byte symbols are treated as half-width characters internally.
+            As a result, moving the cursor up and down will cause it to rattle left and right.
+            See isFullWidthCharacter() in https://github.com/microsoft/vscode/blob/main/src/vs/base/common/strings.ts
 - boxdraw
-    - 仕様
+    - spec
         - cursorUp/cursorDown
-            - 罫線文字が内部的に半角1文字で計算されていることによるカーソルの上下移動時の左右のがたつきを抑制します。
+            - It suppresses left and right rattling when moving the cursor up and down due to the ruled line characters being calculated internally with one half-width character.
         - cursorDown
-            - 最下行では行末に移動する動きは実装していません。
+            - The bottom line does not implement the movement to move to the end of the line.
         - cursorUpSelect/cursorDownSelect
-            - 選択領域の制御は実装していません。
+            - It does not implement control of the selection area.
 
-## 謝辞
+## acknowledgments
 
-- Boxdraw の基本的なアイデアは xyzzy の boxdraw.l を参考にしています。
+- The basic idea of ​​Boxdraw is based on xyzzy's boxdraw.l .
