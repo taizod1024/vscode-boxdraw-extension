@@ -2,7 +2,7 @@
   "name": "boxdraw-extension",
   "displayName": "Boxdraw",
   "description": "vscode boxdraw extension / 罫線文字による図形の描画",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "engines": {
     "vscode": "^1.60.0"
   },
