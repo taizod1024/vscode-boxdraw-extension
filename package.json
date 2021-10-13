@@ -11,6 +11,7 @@
   ],
   "publisher": "taizod1024",
   "main": "./build/extension.js",
+  "browser": "./build/extension.js",
   "activationEvents": [
     "*"
   ],
