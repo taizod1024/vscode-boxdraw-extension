@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.23](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.22...v0.0.23) (2021-10-14)
+
+
+### Bug Fixes
+
+* esbuild対応 ([eb098bb](https://github.com/taizod1024/vscode-boxdraw-extension/commit/eb098bb5a6fe7144a7b2fee76ea054a9ca9e1994))
+
 ### [0.0.22](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.21...v0.0.22) (2021-10-13)
 
 ### [0.0.21](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.20...v0.0.21) (2021-10-13)
