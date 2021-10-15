@@ -112,17 +112,16 @@
     ]
   },
   "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./build/test/runTest.js",
-    "release": "git switch main && git merge --no-ff develop && npx standard-version && vsce publish && git push --follow-tags origin main && git push origin develop && git switch develop",
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=build/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=build/main.js --format=cjs --platform=node --external:vscode",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-    "test-compile": "tsc -p ./"
+    "test": "node ./build/test/runTest.js",
+    "release": "npm run release-step1 && npm run release-step2",
+    "release-step1": "npm run clean && git switch main && git merge --no-ff develop",
+    "release-step2": "npx standard-version && vsce publish && git push --follow-tags origin main && git push origin develop && git switch develop",
+    "package": "vsce package",
+    "clean": "rmdir /q /s .\\build"
   },
   "author": "yamamoto.taizo <taizod1024@gmail.com>",
   "license": "MIT",
