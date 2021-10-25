@@ -14,7 +14,7 @@
         "curly": "off",
         "eqeqeq": "warn",
         "no-throw-literal": "off",
-        "semi": "off"
+        "semi": "warn"
     },
     "ignorePatterns": [
         "**/*.d.ts"
