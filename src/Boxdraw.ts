@@ -263,7 +263,7 @@ class Boxdraw {
                 if (boxdraw.block) return;
 
                 // exit if no clear and no line;
-                if (!isclear && pot.oval == 0) return;
+                if (!isclear && pot.oval === 0) return;
             }
 
             // exit if arrow
@@ -271,26 +271,26 @@ class Boxdraw {
 
             // check move 2nd postion or not
             let ismoved = false;
-            if (direction == "up") {
+            if (direction === "up") {
                 if (cpoc.line >= 1) {
                     ismoved = true;
                     cpoc.line--;
                     ppoc.line--;
                     npoc.line--;
                 }
-            } else if (direction == "left") {
+            } else if (direction === "left") {
                 if (cpoc.column >= 2) {
                     ismoved = true;
                     cpoc.column -= 2;
                     ppoc.column -= 2;
                     npoc.column -= 2;
                 }
-            } else if (direction == "down") {
+            } else if (direction === "down") {
                 ismoved = true;
                 cpoc.line++;
                 ppoc.line++;
                 npoc.line++;
-            } else if (direction == "right") {
+            } else if (direction === "right") {
                 ismoved = true;
                 cpoc.column += 2;
                 ppoc.column += 2;
@@ -317,7 +317,7 @@ class Boxdraw {
                 // draw 2nd position
 
                 // check last line or not
-                if (cpoc.line == document.lineCount) {
+                if (cpoc.line === document.lineCount) {
 
                     // add new line
                     await editor.edit(builder => {
@@ -367,7 +367,7 @@ class Boxdraw {
 
         if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setMode(${[...arguments]})`);
 
-        if (this.mode != mode || force) {
+        if (this.mode !== mode || force) {
             this.mode = mode;
             vscode.commands.executeCommand('setContext', `${this.appid}Mode`, this.mode);
             this.updateStatusbar();
@@ -379,7 +379,7 @@ class Boxdraw {
 
         if (this.debug) this.channel.appendLine(`[${this.timestamp()}] setBlock(${[...arguments]})`);
 
-        if (this.block != block || force) {
+        if (this.block !== block || force) {
             this.block = block;
             vscode.commands.executeCommand('setContext', `${this.appid}Block`, this.block);
             this.updateStatusbar();
@@ -391,7 +391,7 @@ class Boxdraw {
 
         this.channel.appendLine(`[${this.timestamp()}] setDebug(${[...arguments]})`);
 
-        if (this.debug != debug || force) {
+        if (this.debug !== debug || force) {
             this.debug = debug;
             vscode.commands.executeCommand('setContext', `${this.appid}Debug`, this.debug);
         }
@@ -498,7 +498,7 @@ class PosColumn {
         let column = 0;
         let character = 0;
         while (true) {
-            if (column == this.column) {
+            if (column === this.column) {
                 if (character > 0) this.ptxt = chars[character - 1];
                 this.rbgnchr = character;
                 this.rendchr = character;
@@ -517,12 +517,12 @@ class PosColumn {
             }
             let chr = chars[character];
             column += eaw.characterLength(chars[character]);
-            character++
+            character++;
         }
 
         // calc character end
         while (true) {
-            if (column == this.column + 2) {
+            if (column === this.column + 2) {
                 if (character < chars.length) this.ntxt = chars[character];
                 this.rendchr = character;
                 break;
@@ -536,9 +536,9 @@ class PosColumn {
                 this.rendchr = character;
                 break;
             }
-            if (this.rbgnchr2 == 0) this.ctxt += chars[character];
+            if (this.rbgnchr2 === 0) this.ctxt += chars[character];
             column += eaw.characterLength(chars[character]);
-            character++
+            character++;
         }
 
         // fulfill
@@ -587,18 +587,18 @@ class PosText {
         } else {
             // arrow
             if (this.isarrow) {
-                if (this.direction == "up") this.text = "↑";
-                else if (this.direction == "right") this.text = "→";
-                else if (this.direction == "down") this.text = "↓";
-                else if (this.direction == "left") this.text = "←";
+                if (this.direction === "up") this.text = "↑";
+                else if (this.direction === "right") this.text = "→";
+                else if (this.direction === "down") this.text = "↓";
+                else if (this.direction === "left") this.text = "←";
                 else this.text = "";
                 return this.text;
             }
             // calc value by neighbors
-            let uval = Boxdraw.boxchars.find(x => x.char == this.ppoc.ctxt)?.val;
-            let lval = Boxdraw.boxchars.find(x => x.char == this.cpoc.ptxt)?.val;
-            let rval = Boxdraw.boxchars.find(x => x.char == this.cpoc.ntxt)?.val;
-            let dval = Boxdraw.boxchars.find(x => x.char == this.npoc.ctxt)?.val;
+            let uval = Boxdraw.boxchars.find(x => x.char === this.ppoc.ctxt)?.val;
+            let lval = Boxdraw.boxchars.find(x => x.char === this.cpoc.ptxt)?.val;
+            let rval = Boxdraw.boxchars.find(x => x.char === this.cpoc.ntxt)?.val;
+            let dval = Boxdraw.boxchars.find(x => x.char === this.npoc.ctxt)?.val;
             let cval = ((uval & 0b00000100) ? 0b00000001 : 0)
                 | ((rval & 0b00001000) ? 0b00000010 : 0)
                 | ((dval & 0b00000001) ? 0b00000100 : 0)
@@ -609,49 +609,49 @@ class PosText {
                 if (cval) {
                     // bit-or near side at first time
                     if (isfirst) {
-                        if (this.direction == "up") cval |= 0b00000001;
-                        if (this.direction == "right") cval |= 0b00000010;
-                        if (this.direction == "down") cval |= 0b00000100;
-                        if (this.direction == "left") cval |= 0b00001000;
+                        if (this.direction === "up") cval |= 0b00000001;
+                        if (this.direction === "right") cval |= 0b00000010;
+                        if (this.direction === "down") cval |= 0b00000100;
+                        if (this.direction === "left") cval |= 0b00001000;
                     }
                     // bit-or far side at second time
                     else {
-                        if (this.direction == "up") cval |= 0b00000100;
-                        if (this.direction == "right") cval |= 0b00001000;
-                        if (this.direction == "down") cval |= 0b00000001;
-                        if (this.direction == "left") cval |= 0b00000010;
+                        if (this.direction === "up") cval |= 0b00000100;
+                        if (this.direction === "right") cval |= 0b00001000;
+                        if (this.direction === "down") cval |= 0b00000001;
+                        if (this.direction === "left") cval |= 0b00000010;
                     }
 
                 } else {
                     // bit-or both side at blank area
-                    if (this.direction == "up") cval |= 0b00000101;
-                    if (this.direction == "right") cval |= 0b00001010;
-                    if (this.direction == "down") cval |= 0b00000101;
-                    if (this.direction == "left") cval |= 0b00001010;
+                    if (this.direction === "up") cval |= 0b00000101;
+                    if (this.direction === "right") cval |= 0b00001010;
+                    if (this.direction === "down") cval |= 0b00000101;
+                    if (this.direction === "left") cval |= 0b00001010;
                 }
                 // correct value by bit-direction
                 if ([0b00000001, 0b00000010, 0b00000100, 0b00001000].includes(cval)) {
-                    if (this.direction == "up") cval |= 0b00000101;
-                    if (this.direction == "right") cval |= 0b00001010;
-                    if (this.direction == "down") cval |= 0b00000101;
-                    if (this.direction == "left") cval |= 0b00001010;
+                    if (this.direction === "up") cval |= 0b00000101;
+                    if (this.direction === "right") cval |= 0b00001010;
+                    if (this.direction === "down") cval |= 0b00000101;
+                    if (this.direction === "left") cval |= 0b00001010;
                 }
             } else {
                 // bit-and value by direction
                 if (cval) {
                     // bit-and near side at first time
                     if (isfirst) {
-                        if (this.direction == "up") cval &= 0b11111110;
-                        if (this.direction == "right") cval &= 0b11111101;
-                        if (this.direction == "down") cval &= 0b11111011;
-                        if (this.direction == "left") cval &= 0b11110111;
+                        if (this.direction === "up") cval &= 0b11111110;
+                        if (this.direction === "right") cval &= 0b11111101;
+                        if (this.direction === "down") cval &= 0b11111011;
+                        if (this.direction === "left") cval &= 0b11110111;
                     }
                     // bit-and far side at second time
                     else {
-                        if (this.direction == "up") cval &= 0b11111011;
-                        if (this.direction == "right") cval &= 0b11110111;
-                        if (this.direction == "down") cval &= 0b11111110;
-                        if (this.direction == "left") cval &= 0b11111101;
+                        if (this.direction === "up") cval &= 0b11111011;
+                        if (this.direction === "right") cval &= 0b11110111;
+                        if (this.direction === "down") cval &= 0b11111110;
+                        if (this.direction === "left") cval &= 0b11111101;
                     }
                 }
                 // correct value by direction
@@ -660,7 +660,7 @@ class PosText {
                 }
             }
             // convert to text
-            this.text = Boxdraw.boxchars.find(x => x.val == cval)?.char;
+            this.text = Boxdraw.boxchars.find(x => x.val === cval)?.char;
             this.cval = cval;
             return this.text;
         }
@@ -669,13 +669,13 @@ class PosText {
     /** check replace or not */
     public isReplaceOrNot() {
         if (boxdraw.block) {
-            if (this.isarrow) return this.cpoc.ctxt != this.text;
-            if (this.isclear) return this.cpoc.ctxt == "■" || this.cpoc.ctxt == "□";
-            return this.cpoc.ctxt != this.text;
+            if (this.isarrow) return this.cpoc.ctxt !== this.text;
+            if (this.isclear) return this.cpoc.ctxt === "■" || this.cpoc.ctxt === "□";
+            return this.cpoc.ctxt !== this.text;
         } else {
-            if (this.isarrow) return this.cpoc.ctxt != this.text;
-            if (this.isclear) return Boxdraw.boxchars.find(x => x.char == this.cpoc.ctxt) != null;
-            return this.cpoc.ctxt != this.text;
+            if (this.isarrow) return this.cpoc.ctxt !== this.text;
+            if (this.isclear) return Boxdraw.boxchars.find(x => x.char === this.cpoc.ctxt) !== null;
+            return this.cpoc.ctxt !== this.text;
         }
     }
 
