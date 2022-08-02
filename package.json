@@ -10,7 +10,9 @@
     "Other"
   ],
   "keywords": [
-    "text"
+    "text",
+    "character",
+    "line"
   ],
   "publisher": "taizod1024",
   "main": "./build/main.js",
