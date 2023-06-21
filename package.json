@@ -4,7 +4,7 @@
   "displayName": "Boxdraw",
   "description": "boxdraw extension / 罫線文字による図形の描画",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
@@ -17,9 +17,6 @@
   "publisher": "taizod1024",
   "main": "./build/main.js",
   "browser": "./build/main.js",
-  "activationEvents": [
-    "*"
-  ],
   "contributes": {
     "commands": [
       {
@@ -75,6 +72,26 @@
         "when": "boxdrawMode"
       },
       {
+        "command": "boxdraw.drawLeft",
+        "key": "alt+left",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw.drawRight",
+        "key": "alt+right",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw.drawUp",
+        "key": "alt+up",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw.drawDown",
+        "key": "alt+down",
+        "when": "boxdrawMode"
+      },
+      {
         "command": "boxdraw.drawLeftArrow",
         "key": "ctrl+alt+left",
         "when": "boxdrawMode"
@@ -112,6 +129,26 @@
       {
         "command": "boxdraw.clearDown",
         "key": "ctrl+shift+down",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw.clearLeft",
+        "key": "alt+shift+left",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw.clearRight",
+        "key": "alt+shift+right",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw.clearUp",
+        "key": "alt+shift+up",
+        "when": "boxdrawMode"
+      },
+      {
+        "command": "boxdraw.clearDown",
+        "key": "alt+shift+down",
         "when": "boxdrawMode"
       }
     ]
