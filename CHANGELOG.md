@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.28](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.27...v0.0.28) (2023-06-21)
+
+
+### Features
+
+* [#6](https://github.com/taizod1024/vscode-boxdraw-extension/issues/6):Keybindings not working on macOS ([bec8e5d](https://github.com/taizod1024/vscode-boxdraw-extension/commit/bec8e5d7aae8b3ceb9d1321aac796edc52f7a54e))
+
 ### [0.0.27](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.26...v0.0.27) (2022-08-02)
 
 ### [0.0.26](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.25...v0.0.26) (2022-08-02)
