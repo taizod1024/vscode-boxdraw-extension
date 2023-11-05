@@ -63,111 +63,109 @@ class Boxdraw {
   /** activate extension */
   public activate(context: vscode.ExtensionContext) {
     // init context
-    this.channel = vscode.window.createOutputChannel(this.appId);
-    this.channel.appendLine(`[${this.timestamp()}] ${this.appId} activated`);
+    this.channel = vscode.window.createOutputChannel(this.appId, { log: true });
+    this.channel.appendLine(`${this.appId} activated.`);
 
     // init context
     this.mode = false;
     this.block = false;
     this.isExecuting = false;
 
-    // init vscode
-
-    // - command
+    // register command
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.toggleMode`, () => {
-        boxdraw.toggleMode();
+        this.toggleMode();
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.toggleBlock`, () => {
-        boxdraw.toggleBlock();
+        this.toggleBlock();
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.transitionModes`, () => {
-        boxdraw.transitionModes();
+        this.transitionModes();
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.cursorUp`, () => {
-        boxdraw.cursorUp();
+      vscode.commands.registerCommand(`${this.appId}.cursorUp`, async () => {
+        this.cursorUpAsync();
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.cursorDown`, () => {
-        boxdraw.cursorDown();
+      vscode.commands.registerCommand(`${this.appId}.cursorDown`, async () => {
+        this.cursorDownAsync();
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawLeft`, () => {
-        boxdraw.drawBox("left");
+      vscode.commands.registerCommand(`${this.appId}.drawLeft`, async () => {
+        this.drawBoxAsync("left");
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawRight`, () => {
-        boxdraw.drawBox("right");
+      vscode.commands.registerCommand(`${this.appId}.drawRight`, async () => {
+        this.drawBoxAsync("right");
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawUp`, () => {
-        boxdraw.drawBox("up");
+      vscode.commands.registerCommand(`${this.appId}.drawUp`, async () => {
+        this.drawBoxAsync("up");
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawDown`, () => {
-        boxdraw.drawBox("down");
+      vscode.commands.registerCommand(`${this.appId}.drawDown`, async () => {
+        this.drawBoxAsync("down");
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawLeftArrow`, () => {
-        boxdraw.drawBox("left", true);
+      vscode.commands.registerCommand(`${this.appId}.drawLeftArrow`, async () => {
+        this.drawBoxAsync("left", true);
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawRightArrow`, () => {
-        boxdraw.drawBox("right", true);
+      vscode.commands.registerCommand(`${this.appId}.drawRightArrow`, async () => {
+        this.drawBoxAsync("right", true);
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawUpArrow`, () => {
-        boxdraw.drawBox("up", true);
+      vscode.commands.registerCommand(`${this.appId}.drawUpArrow`, async () => {
+        this.drawBoxAsync("up", true);
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.drawDownArrow`, () => {
-        boxdraw.drawBox("down", true);
+      vscode.commands.registerCommand(`${this.appId}.drawDownArrow`, async () => {
+        this.drawBoxAsync("down", true);
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.clearLeft`, () => {
-        boxdraw.drawBox("left", false, true);
+      vscode.commands.registerCommand(`${this.appId}.clearLeft`, async () => {
+        this.drawBoxAsync("left", false, true);
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.clearRight`, () => {
-        boxdraw.drawBox("right", false, true);
+      vscode.commands.registerCommand(`${this.appId}.clearRight`, async () => {
+        this.drawBoxAsync("right", false, true);
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.clearUp`, () => {
-        boxdraw.drawBox("up", false, true);
+      vscode.commands.registerCommand(`${this.appId}.clearUp`, async () => {
+        this.drawBoxAsync("up", false, true);
       })
     );
     context.subscriptions.push(
-      vscode.commands.registerCommand(`${this.appId}.clearDown`, () => {
-        boxdraw.drawBox("down", false, true);
+      vscode.commands.registerCommand(`${this.appId}.clearDown`, async () => {
+        this.drawBoxAsync("down", false, true);
       })
     );
 
-    // - statusbar
+    // regsiter status bar
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     this.statusBarItem.command = `${this.appId}.transitionModes`;
     this.statusBarItem.tooltip = this.appId;
     this.statusBarItem.show();
     context.subscriptions.push(this.statusBarItem);
 
-    // - setcontext
+    // set context
     this.setMode(false, true);
     this.setBlock(false, true);
   }
@@ -177,21 +175,18 @@ class Boxdraw {
   /** toggle mode */
   public toggleMode() {
     if (this.config.debug) this.channel.appendLine(`--------`);
-
     this.setMode(!this.mode);
   }
 
   /** toggle block */
   public toggleBlock() {
     if (this.config.debug) this.channel.appendLine(`--------`);
-
     this.setBlock(!this.block);
   }
 
   /** transition modes */
   public transitionModes() {
     if (this.config.debug) this.channel.appendLine(`--------`);
-
     if (!this.mode) {
       this.setMode(true);
       this.setBlock(false);
@@ -204,7 +199,7 @@ class Boxdraw {
   }
 
   /** move to previous line */
-  public async cursorUp() {
+  public async cursorUpAsync() {
     try {
       if (this.config.debug) this.channel.appendLine(`--------`);
 
@@ -232,7 +227,7 @@ class Boxdraw {
   }
 
   /** move to next line */
-  public async cursorDown() {
+  public async cursorDownAsync() {
     try {
       if (this.config.debug) this.channel.appendLine(`--------`);
 
@@ -260,7 +255,7 @@ class Boxdraw {
   }
 
   /** draw line, draw arrow, clear line */
-  protected async drawBox(direction: Direction, isarrow = false, isclear = false) {
+  protected async drawBoxAsync(direction: Direction, isarrow = false, isclear = false) {
     // check executing
     if (this.isExecuting) {
       return;
@@ -269,7 +264,7 @@ class Boxdraw {
 
     try {
       if (this.config.debug) this.channel.appendLine(`--------`);
-      if (this.config.debug) this.channel.appendLine(`[${this.timestamp()}] drawBox(${[...arguments]})`);
+      if (this.config.debug) this.channel.appendLine(`drawBox(${[...arguments]})`);
 
       // check editor and document exist
       const editor = vscode.window?.activeTextEditor;
@@ -498,9 +493,8 @@ class Boxdraw {
   // inner interface
 
   /** set mode */
-  public setMode(mode: boolean, force = false) {
-    if (this.config.debug) this.channel.appendLine(`[${this.timestamp()}] setMode(${[...arguments]})`);
-
+  private setMode(mode: boolean, force = false) {
+    if (this.config.debug) this.channel.appendLine(`setMode(${[...arguments]})`);
     if (this.mode !== mode || force) {
       this.mode = mode;
       vscode.commands.executeCommand("setContext", `${this.appId}Mode`, this.mode);
@@ -509,8 +503,8 @@ class Boxdraw {
   }
 
   /** set block */
-  public setBlock(block: boolean, force = false) {
-    if (this.config.debug) this.channel.appendLine(`[${this.timestamp()}] setBlock(${[...arguments]})`);
+  private setBlock(block: boolean, force = false) {
+    if (this.config.debug) this.channel.appendLine(`setBlock(${[...arguments]})`);
 
     if (this.block !== block || force) {
       this.block = block;
@@ -520,20 +514,13 @@ class Boxdraw {
   }
 
   /** update statusbar */
-  public updateStatusbar() {
-    if (this.config.debug) this.channel.appendLine(`[${this.timestamp()}] updateStatusbar(${[...arguments]})`);
+  private updateStatusbar() {
+    if (this.config.debug) this.channel.appendLine(`updateStatusbar(${[...arguments]})`);
 
     this.statusBarItem.backgroundColor = this.mode ? new vscode.ThemeColor("statusBarItem.errorBackground") : undefined;
     this.statusBarItem.text = "";
     this.statusBarItem.text += this.block ? "$(primitive-square)" : "$(edit)";
     this.statusBarItem.text += this.config.debug ? " debug" : "";
-  }
-
-  // utility
-
-  /** return timestamp string */
-  public timestamp(): string {
-    return new Date().toLocaleString("ja-JP").split(" ")[1];
   }
 }
 export const boxdraw = new Boxdraw();
@@ -581,7 +568,7 @@ class PosColumn {
 
   /** get cursor cposition */
   public static getCursor(): PosColumn {
-    if (boxdraw.config.debug) boxdraw.channel.appendLine(`[${boxdraw.timestamp()}] getCursor(${[...arguments]})`);
+    if (boxdraw.config.debug) boxdraw.channel.appendLine(`getCursor(${[...arguments]})`);
 
     const editor = vscode.window.activeTextEditor;
     const document = editor.document;
@@ -595,7 +582,7 @@ class PosColumn {
 
   /** poscolum to position */
   public toPosition(fulfill = false) {
-    if (boxdraw.config.debug) boxdraw.channel.appendLine(`[${boxdraw.timestamp()}] getPosition(${[...arguments]})`);
+    if (boxdraw.config.debug) boxdraw.channel.appendLine(`getPosition(${[...arguments]})`);
 
     const editor = vscode.window.activeTextEditor;
     const document = editor.document;
