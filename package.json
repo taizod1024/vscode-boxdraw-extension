@@ -26,10 +26,6 @@
       {
         "command": "boxdraw.toggleBlock",
         "title": "Boxdraw: Toggle Block"
-      },
-      {
-        "command": "boxdraw.toggleDebug",
-        "title": "Boxdraw: Toggle Debug"
       }
     ],
     "keybindings": [
@@ -151,7 +147,16 @@
         "key": "alt+shift+down",
         "when": "boxdrawMode"
       }
-    ]
+    ],
+    "configuration": {
+      "properties": {
+        "boxdraw.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "debug mode"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
