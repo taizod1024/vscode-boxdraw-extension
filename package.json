@@ -4,7 +4,7 @@
   "displayName": "Boxdraw",
   "description": "boxdraw extension / 罫線文字による図形の描画",
   "engines": {
-    "vscode": "^1.70.0"
+    "vscode": "^1.84.0"
   },
   "categories": [
     "Other"
