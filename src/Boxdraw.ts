@@ -17,8 +17,6 @@ class Boxdraw {
   public mode: boolean;
   /** flag for block */
   public block: boolean;
-  /** flag for debug  */
-  public debug: boolean;
   /** flag for isexecuting */
   private isExecuting: boolean;
 
@@ -89,72 +87,72 @@ class Boxdraw {
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.cursorUp`, async () => {
-        this.cursorUpAsync();
+        await this.cursorUpAsync();
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.cursorDown`, async () => {
-        this.cursorDownAsync();
+        await this.cursorDownAsync();
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawLeft`, async () => {
-        this.drawBoxAsync("left");
+        await this.drawBoxAsync("left");
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawRight`, async () => {
-        this.drawBoxAsync("right");
+        await this.drawBoxAsync("right");
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawUp`, async () => {
-        this.drawBoxAsync("up");
+        await this.drawBoxAsync("up");
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawDown`, async () => {
-        this.drawBoxAsync("down");
+        await this.drawBoxAsync("down");
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawLeftArrow`, async () => {
-        this.drawBoxAsync("left", true);
+        await this.drawBoxAsync("left", true);
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawRightArrow`, async () => {
-        this.drawBoxAsync("right", true);
+        await this.drawBoxAsync("right", true);
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawUpArrow`, async () => {
-        this.drawBoxAsync("up", true);
+        await this.drawBoxAsync("up", true);
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.drawDownArrow`, async () => {
-        this.drawBoxAsync("down", true);
+        await this.drawBoxAsync("down", true);
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.clearLeft`, async () => {
-        this.drawBoxAsync("left", false, true);
+        await this.drawBoxAsync("left", false, true);
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.clearRight`, async () => {
-        this.drawBoxAsync("right", false, true);
+        await this.drawBoxAsync("right", false, true);
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.clearUp`, async () => {
-        this.drawBoxAsync("up", false, true);
+        await this.drawBoxAsync("up", false, true);
       })
     );
     context.subscriptions.push(
       vscode.commands.registerCommand(`${this.appId}.clearDown`, async () => {
-        this.drawBoxAsync("down", false, true);
+        await this.drawBoxAsync("down", false, true);
       })
     );
 
