@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.29](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.28...v0.0.29) (2024-06-05)
+
+
+### Features
+
+* デバッグモードを設定に移動 ([6e01f8e](https://github.com/taizod1024/vscode-boxdraw-extension/commit/6e01f8e32abaa21c4f2119608cd79853fbd73503))
+
 ### [0.0.28](https://github.com/taizod1024/vscode-boxdraw-extension/compare/v0.0.27...v0.0.28) (2023-06-21)
 
 
