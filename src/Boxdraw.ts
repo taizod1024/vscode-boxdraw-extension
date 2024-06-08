@@ -11,6 +11,9 @@ class Boxdraw {
   /** application id for vscode */
   private appId = "boxdraw";
 
+  /** application name */
+  private appName = "Boxdraw";
+
   // context
 
   /** flag for boxdaw */
@@ -61,7 +64,7 @@ class Boxdraw {
   /** activate extension */
   public activate(context: vscode.ExtensionContext) {
     // init context
-    this.channel = vscode.window.createOutputChannel(this.appId, { log: true });
+    this.channel = vscode.window.createOutputChannel(this.appName, { log: true });
     this.channel.appendLine(`${this.appId} activated.`);
 
     // init context
