@@ -521,7 +521,6 @@ class Boxdraw {
     this.statusBarItem.backgroundColor = this.mode ? new vscode.ThemeColor("statusBarItem.errorBackground") : undefined;
     this.statusBarItem.text = "";
     this.statusBarItem.text += this.block ? "$(primitive-square)" : "$(edit)";
-    this.statusBarItem.text += this.config.debug ? " debug" : "";
   }
 }
 export const boxdraw = new Boxdraw();
