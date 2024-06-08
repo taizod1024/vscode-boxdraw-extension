@@ -4,7 +4,7 @@
   "displayName": "Boxdraw",
   "description": "boxdraw extension / 罫線文字による図形の描画",
   "engines": {
-    "vscode": "^1.84.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Other"
@@ -17,7 +17,6 @@
   "publisher": "taizod1024",
   "main": "./build/main.js",
   "browser": "./build/main.js",
-  "activationEvents": [],
   "contributes": {
     "commands": [
       {
@@ -182,7 +181,7 @@
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^13.1.0",
     "@types/node": "^16.9.6",
-    "@types/vscode": "^1.84.0",
+    "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.2",
     "esbuild": "^0.13.6",
@@ -190,7 +189,9 @@
     "husky": "^4.3.8",
     "standard-version": "^9.3.1",
     "ts-node": "^10.2.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "vscode": "^1.1.37",
+    "vscode-test": "^1.6.1"
   },
   "repository": {
     "type": "git",
