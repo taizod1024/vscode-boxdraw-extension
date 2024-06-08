@@ -151,11 +151,6 @@
     ],
     "configuration": {
       "properties": {
-        "boxdraw.useSingle": {
-          "type": "boolean",
-          "default": false,
-          "description": "The width of box-drawing characters is equivalent to that of a single half-width space."
-        },
         "boxdraw.debug": {
           "type": "boolean",
           "default": false,
