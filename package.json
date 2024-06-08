@@ -1,5 +1,5 @@
 {
-  "version": "0.0.32",
+  "version": "0.0.33",
   "name": "boxdraw-extension",
   "displayName": "Boxdraw",
   "description": "boxdraw extension / 罫線文字による図形の描画",
